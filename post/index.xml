@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+      <title>Posts on My New Hugo Site </title>
+      <generator uri="https://gohugo.io">Hugo</generator>
+    <link>http://replace-this-with-your-hugo-site.com/post/</link>
+    <language>en-us</language>
+    
+    
+    <updated>Mon, 25 Jan 2016 19:58:03 MYT</updated>
+    
+    <item>
+      <title>welcome</title>
+      <link>http://replace-this-with-your-hugo-site.com/post/welcome/</link>
+      <pubDate>Mon, 25 Jan 2016 19:58:03 MYT</pubDate>
+      
+      <guid>http://replace-this-with-your-hugo-site.com/post/welcome/</guid>
+      <description>&lt;p&gt;##Welcome
+Welcome to my Blog&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
