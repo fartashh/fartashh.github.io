@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-      <title> on My New Hugo Site </title>
+      <title> on Fartash Haghani </title>
       <generator uri="https://gohugo.io">Hugo</generator>
-    <link>http://replace-this-with-your-hugo-site.com/</link>
+    <link>http://fartashh.github.io/</link>
     <language>en-us</language>
     
     
@@ -11,10 +11,10 @@
     
     <item>
       <title>welcome</title>
-      <link>http://replace-this-with-your-hugo-site.com/post/welcome/</link>
+      <link>http://fartashh.github.io/post/welcome/</link>
       <pubDate>Mon, 25 Jan 2016 19:58:03 MYT</pubDate>
       
-      <guid>http://replace-this-with-your-hugo-site.com/post/welcome/</guid>
+      <guid>http://fartashh.github.io/post/welcome/</guid>
       <description>&lt;p&gt;##Welcome
 Welcome to my Blog&lt;/p&gt;
 </description>
