@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Angularjs on Fartash</title>
+    <link>http://fartashh.github.io/tags/angularjs/</link>
+    <description>Recent content in Angularjs on Fartash</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 28 Jan 2016 13:58:27 +0800</lastBuildDate>
+    <atom:link href="http://fartashh.github.io/tags/angularjs/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Angularjs</title>
+      <link>http://fartashh.github.io/post/Angularjs/</link>
+      <pubDate>Thu, 28 Jan 2016 13:58:27 +0800</pubDate>
+      
+      <guid>http://fartashh.github.io/post/Angularjs/</guid>
+      <description>&lt;p&gt;This is a Angularjs post Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean comm&lt;/p&gt;
+
+&lt;p&gt;Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
