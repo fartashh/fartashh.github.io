@@ -1,18 +1,30 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-      <title> on Fartash Haghani </title>
-      <generator uri="https://gohugo.io">Hugo</generator>
+    <title>Fartash Haghani</title>
     <link>http://fartashh.github.io/</link>
+    <description>Recent content on Fartash Haghani</description>
+    <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
+    <lastBuildDate>Tue, 26 Jan 2016 15:53:44 +0800</lastBuildDate>
+    <atom:link href="http://fartashh.github.io/index.xml" rel="self" type="application/rss+xml" />
     
-    
-    <updated>Mon, 25 Jan 2016 19:58:03 MYT</updated>
+    <item>
+      <title>About</title>
+      <link>http://fartashh.github.io/about/</link>
+      <pubDate>Tue, 26 Jan 2016 15:53:44 +0800</pubDate>
+      
+      <guid>http://fartashh.github.io/about/</guid>
+      <description>
+
+&lt;h2 id=&#34;about-me:6083a88ee3411b0d17ce02d738f69d47&#34;&gt;About me&lt;/h2&gt;
+</description>
+    </item>
     
     <item>
       <title>welcome</title>
       <link>http://fartashh.github.io/post/welcome/</link>
-      <pubDate>Mon, 25 Jan 2016 19:58:03 MYT</pubDate>
+      <pubDate>Mon, 25 Jan 2016 19:58:03 +0800</pubDate>
       
       <guid>http://fartashh.github.io/post/welcome/</guid>
       <description>&lt;p&gt;##Welcome
