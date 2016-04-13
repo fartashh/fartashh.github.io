@@ -1,0 +1,23 @@
+{{ partial "head" . }}
+	<body id="top">
+		{{ partial "header" . }}
+
+		{{ "<!-- Main -->" | safeHTML }}
+		<div id="main">
+            <h3><a href="{{ .RelPermalink }}">{{ .Title }} </a> <span class="post-date">{{ .Date.Format "Mon, Jan 2, 2006" }}</span>
+            </h3>
+
+            <p> {{ .Content }} </p>
+
+            <ul id="tags">
+                {{ range .Params.tags }}
+                <li class="tag"><a href="tags/{{ . | urlize }}">{{ . }}</a></li>
+                {{ end }}
+            </ul>
+			<a href="/"> <i class="fa fa-home"></i> </a>
+
+		</div>
+
+		{{ partial "footer" . }}
+	</body>
+</html>

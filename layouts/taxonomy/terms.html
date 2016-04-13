@@ -1,0 +1,18 @@
+{{ partial "head" . }}
+	<body id="top">
+		{{ partial "header" . }}
+
+		{{ "<!-- Main -->" | safeHTML }}
+		<div id="main">
+			   <ul>
+    {{ $data := .Data }}
+    {{ range $key, $value := .Data.Terms }}
+      <li><a href="{{ $data.Plural }}/{{ $key | urlize }}">{{ $key }}</a> {{ len $value }}</li>
+    {{ end }}
+   </ul>
+
+		</div>
+
+		{{ partial "footer" . }}
+	</body>
+</html>

@@ -1,0 +1,21 @@
+{{ "<!-- portfolio -->" | safeHTML }}
+<section id="history">
+    <h2>Recent Posts</h2>
+
+    <div class="row">
+        {{ range after 1  .Data.Pages }}
+        <article class="6u 12u$(xsmall) work-item">
+            <h3><a href="{{ .RelPermalink }}">{{ .Title }} </a> <span class="post-date">{{ .Date.Format "Mon, Jan 2, 2006" }}</span>
+            </h3>
+
+            <p>{{ .Summary }}</p>
+            <ul id="tags">
+                {{ range .Params.tags }}
+                <li class="tag"><a href="tags/{{ . | urlize }}">{{ . }}</a></li>
+                {{ end }}
+            </ul>
+
+        </article>
+        {{ end }}
+    </div>
+</section>
