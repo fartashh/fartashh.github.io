@@ -3,6 +3,7 @@ categories = ["x", "y"]
 date = "2016-01-28T11:39:11+08:00"
 tags = ["x", "y"]
 title = "test"
+draft = true
 
 +++
 

@@ -1,7 +1,7 @@
 +++
 categories = ["x", "y"]
 date = "2016-01-28T13:58:27+08:00"
-draft = false
+draft = true
 tags = ["Javascript", "Angularjs"]
 title = "Angularjs"
 
