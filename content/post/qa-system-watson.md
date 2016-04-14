@@ -7,7 +7,7 @@ title = "Create a Natural Language Question Answering system with IBM Watson"
 +++
 
 Recently I started a new project to build QA system for Mindvalley. After a short discussion with my colleagues we decided 
-to use the 2011 jeopardy winner **Watsson**.
+to use the 2011 jeopardy winner *Watson*.
 <!--more-->
 
 As you may know Watson is a question answering computer system capable of answering questions posed in natural language,
