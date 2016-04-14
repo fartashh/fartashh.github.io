@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Self on Fartash</title>
+    <link>http://fartashh.github.io/tags/self/</link>
+    <description>Recent content in Self on Fartash</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 14 Apr 2016 10:47:21 +0800</lastBuildDate>
+    <atom:link href="http://fartashh.github.io/tags/self/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Blog init</title>
+      <link>http://fartashh.github.io/post/blog-init/</link>
+      <pubDate>Thu, 14 Apr 2016 10:47:21 +0800</pubDate>
+      
+      <guid>http://fartashh.github.io/post/blog-init/</guid>
+      <description>&lt;p&gt;Let&amp;rsquo;s start writing, sharing and have some fun. let&amp;rsquo;s init Blog :)&lt;/p&gt;
+
+&lt;p&gt;After a long time, finally I decided to start blogging. Its purpose is dul;
+First, document my adventures in software development, architecture, deployment and mostly data science as a way to reinforce concepts I am learning and implementing into projects.
+Secondly, it is a great platform to share my perspective on miscellaneous subjects, in which I hope can spark meaningful discussion from all viewpoints.&lt;/p&gt;
+
+&lt;p&gt;stay tuned :)&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
