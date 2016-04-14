@@ -2570,6 +2570,7 @@
       max-width: 59em;
       padding: 4em 4em 4em 4em;
     	width: calc(100% - 30%);
+        color: #000000;
 	}
 
 		#main > section {
