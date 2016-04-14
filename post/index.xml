@@ -6,8 +6,40 @@
     <description>Recent content in Posts on Fartash</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 14 Apr 2016 10:47:21 +0800</lastBuildDate>
+    <lastBuildDate>Thu, 14 Apr 2016 15:46:49 +0800</lastBuildDate>
     <atom:link href="http://fartashh.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Create a Natural Language Question Answering system with IBM Watson</title>
+      <link>http://fartashh.github.io/post/qa-system-watson/</link>
+      <pubDate>Thu, 14 Apr 2016 15:46:49 +0800</pubDate>
+      
+      <guid>http://fartashh.github.io/post/qa-system-watson/</guid>
+      <description>
+
+&lt;p&gt;Recently I started a new project to build QA system for Mindvalley. After a short discussion with my colleagues we decided
+to use the 2011 jeopardy winner &lt;strong&gt;Watsson&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;As you may know Watson is a question answering computer system capable of answering questions posed in natural language,
+it developed in IBM&amp;rsquo;s DeepQA project by a research team led by principal investigator David Ferrucci.&lt;/p&gt;
+
+&lt;p&gt;IBM also released it&amp;rsquo;s cloud platform &lt;em&gt;IBM Bluemix&lt;/em&gt; in 2014. It supports several programming languages and services
+as well as integrated DevOps to build, run, deploy and manage applications on the cloud.
+And of-course Watson API&amp;rsquo;s are accessible in Bluemix platform.&lt;/p&gt;
+
+&lt;h2 id=&#34;before-you-begin:6bb7f442dc162763233a48477a1fafee&#34;&gt;Before you begin&lt;/h2&gt;
+
+&lt;p&gt;Before you begin, you need the following pieces&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;You need &lt;a href=&#34;https://console.ng.bluemix.net/registration/&#34;&gt;Bluemix account&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Node.js&lt;/li&gt;
+&lt;li&gt;Python&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;overview-of-questin-answer-system:6bb7f442dc162763233a48477a1fafee&#34;&gt;Overview of Questin Answer System&lt;/h2&gt;
+</description>
+    </item>
     
     <item>
       <title>Blog init</title>
@@ -17,7 +49,7 @@
       <guid>http://fartashh.github.io/post/blog-init/</guid>
       <description>&lt;p&gt;Let&amp;rsquo;s start writing, sharing and have some fun. let&amp;rsquo;s init Blog :)&lt;/p&gt;
 
-&lt;p&gt;After a long time, finally I decided to start blogging. Its purpose is dul;
+&lt;p&gt;After a long time, finally I decided to start blogging. Its purpose is dual;
 First, document my adventures in software development, architecture, deployment and mostly data science as a way to reinforce concepts I am learning and implementing into projects.
 Secondly, it is a great platform to share my perspective on miscellaneous subjects, in which I hope can spark meaningful discussion from all viewpoints.&lt;/p&gt;
 

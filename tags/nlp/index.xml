@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Fartash</title>
-    <link>http://fartashh.github.io/</link>
-    <description>Recent content on Fartash</description>
+    <title>Nlp on Fartash</title>
+    <link>http://fartashh.github.io/tags/nlp/</link>
+    <description>Recent content in Nlp on Fartash</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Thu, 14 Apr 2016 15:46:49 +0800</lastBuildDate>
-    <atom:link href="http://fartashh.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://fartashh.github.io/tags/nlp/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Create a Natural Language Question Answering system with IBM Watson</title>
@@ -38,22 +38,6 @@ And of-course Watson API&amp;rsquo;s are accessible in Bluemix platform.&lt;/p&g
 &lt;/ul&gt;
 
 &lt;h2 id=&#34;overview-of-questin-answer-system:6bb7f442dc162763233a48477a1fafee&#34;&gt;Overview of Questin Answer System&lt;/h2&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Blog init</title>
-      <link>http://fartashh.github.io/post/blog-init/</link>
-      <pubDate>Thu, 14 Apr 2016 10:47:21 +0800</pubDate>
-      
-      <guid>http://fartashh.github.io/post/blog-init/</guid>
-      <description>&lt;p&gt;Let&amp;rsquo;s start writing, sharing and have some fun. let&amp;rsquo;s init Blog :)&lt;/p&gt;
-
-&lt;p&gt;After a long time, finally I decided to start blogging. Its purpose is dual;
-First, document my adventures in software development, architecture, deployment and mostly data science as a way to reinforce concepts I am learning and implementing into projects.
-Secondly, it is a great platform to share my perspective on miscellaneous subjects, in which I hope can spark meaningful discussion from all viewpoints.&lt;/p&gt;
-
-&lt;p&gt;stay tuned :)&lt;/p&gt;
 </description>
     </item>
     
