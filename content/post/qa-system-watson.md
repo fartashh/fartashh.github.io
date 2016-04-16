@@ -4,6 +4,8 @@ date = "2016-04-14T15:46:49+08:00"
 draft = false
 tags = ["ML", "NLP"]
 title = "Create a Natural Language Question Answering system with IBM Watson"
+image = "http://fartashh.github.io/images/post/qa-system-watson/watson.png"
+desc = "Recently I started a new project to build QA system for Mindvalley. After a short discussion with my colleagues we decided to use the 2011 jeopardy winner (Watson). This post explains the Watson Q&A concepts and guides you to build your own Q&A system"
 +++
 
 {{< img src="/images/post/qa-system-watson/watson.png" title="" class="align-center">}}

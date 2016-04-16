@@ -10,7 +10,8 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="author" content="{{ with .Site.Params.name }}{{ . }}{{ end }}">
-    	<meta name="description" content="{{ with .Site.Params.description }}{{ . }}{{ end }}">
+    	<meta name="description" content="{{ with .Params.desc }}{{ . }}{{ end }}">
+		<meta property="og:image" content="{{ with .Params.image}}{{ . }}{{ end }}" />
     	<meta http-equiv="content-language" content="{{ with .Site.LanguageCode }}{{ . }}{{ end }}" />
     	{{ .Hugo.Generator }}
 		<!--[if lte IE 8]><script src="{{ .Site.BaseURL }}js/ie/html5shiv.js"></script><![endif]-->
