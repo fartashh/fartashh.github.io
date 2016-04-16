@@ -1,6 +1,7 @@
 {{ partial "head" . }}
 	<body id="top">
         {{ partial "googleTagManager" . }}
+        {{ partial "addThisScript" . }}
 		{{ partial "header" . }}
 
 		{{ "<!-- Main -->" | safeHTML }}
@@ -16,7 +17,7 @@
                 {{ end }}
             </ul>
 
-
+            {{ partial "addThisBtns" . }}
 			<a href="/"> <i class="fa fa-home"></i> </a>
 
             {{ partial "comments.html" .}}
