@@ -60,8 +60,6 @@ IBM also released it&rsquo;s cloud platform <em>IBM Bluemix</em> in 2014. It sup
 as well as integrated DevOps to build, run, deploy and manage applications on the cloud.
 And of-course Watson API&rsquo;s are accessible in Bluemix platform.</p>
 
-<p><code>{&quot;status&quot;:&quot;in_progress&quot;}</code></p>
-
 <h2 id="before-you-begin:6bb7f442dc162763233a48477a1fafee">Before you begin</h2>
 
 <p>Before you begin, you need the following pieces</p>
@@ -191,27 +189,242 @@ you need to create two services <code>Document Conversion</code> and <code>Retri
 
 <p>This service helps users find the most relevant information for their query by using a combination of search and machine
 learning algorithms to detect &ldquo;signals&rdquo; in the data. Built on top of Apache Solr, developers load their data into the service,
-train a machine learning model based on known relevant results, then leverage this model to provide improved results to their end users based on their question or query.</p>
+train a machine learning model based on known relevant results, then leverage this model to provide improved results to their
+end users based on their question or query.</p>
 
-<p>Lets makes our hands dirty. if you have worked with Solr before, you may know we need our cluster and collection to index the data, so the let&rsquo;s setup them.
-I used Node.js for this project before you start you need to install</p>
+<p>Lets makes our hands dirty. if you have worked with Solr before, you may know we need our cluster and collection to index the data,
+so the let&rsquo;s setup them.I used Node.js for this project before you start you need to install
+Node client library to use the Watson Developer Cloud services, a collection of REST APIs and SDKs that use cognitive computing
+to solve complex problems. <code>npm install watson-developer-cloud --save</code></p>
 
-<ol>
-<li><p>Create Cluster
-To use the Retrieve and Rank service, you must create a Solr cluster. A Solr cluster manages your search collections, which you will create later.</p></li>
+<p>the next and last pre step is create conf file;
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">    <span style="color: #66d9ef">var</span> <span style="color: #a6e22e">watson</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">require</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&#39;watson-developer-cloud&#39;</span><span style="color: #f8f8f2">);</span>
+    
+    <span style="color: #66d9ef">var</span> <span style="color: #a6e22e">retrieve_and_rank</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">watson</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">retrieve_and_rank</span><span style="color: #f8f8f2">({</span>
+        <span style="color: #a6e22e">username</span><span style="color: #f92672">:</span> <span style="color: #e6db74">&#39;{username}&#39;</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #a6e22e">password</span><span style="color: #f92672">:</span> <span style="color: #e6db74">&#39;{password}&#39;</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #a6e22e">version</span><span style="color: #f92672">:</span> <span style="color: #e6db74">&#39;v1&#39;</span>
+    <span style="color: #f8f8f2">});</span>
+    
+    <span style="color: #66d9ef">var</span> <span style="color: #a6e22e">cluster_name</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">&#39;your_cluster_name&#39;</span>
+    <span style="color: #66d9ef">var</span> <span style="color: #a6e22e">cluster_size</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">&#39;your cluster size&#39;</span>
+    
+    <span style="color: #a6e22e">module</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">exports</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">retrieve_and_rank</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">retrieve_and_rank</span>
+    <span style="color: #a6e22e">module</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">exports</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">cluster_name</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">cluster_name</span>
+    <span style="color: #a6e22e">module</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">exports</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">cluster_size</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">cluster_size</span>
+</pre></div>
+</p>
 
-<li><p>Create Collection</p></li>
+<p><strong>1. Create Cluster</strong><br />
+To use the Retrieve and Rank service, you must create a Solr cluster. A Solr cluster manages your search collections, which you will create later.
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">    <span style="color: #a6e22e">conf</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">retrieve_and_rank</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">createCluster</span><span style="color: #f8f8f2">({</span>
+        <span style="color: #a6e22e">cluster_size</span><span style="color: #f92672">:</span> <span style="color: #a6e22e">conf</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">cluster_size</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #a6e22e">cluster_name</span><span style="color: #f92672">:</span> <span style="color: #a6e22e">conf</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">cluster_name</span>
+    <span style="color: #f8f8f2">},</span>
+    <span style="color: #66d9ef">function</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">err</span><span style="color: #f8f8f2">,</span> <span style="color: #a6e22e">response</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">err</span><span style="color: #f8f8f2">){</span>
+            <span style="color: #a6e22e">console</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">log</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&#39;error:&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #a6e22e">err</span><span style="color: #f8f8f2">);</span>
+            <span style="color: #a6e22e">res</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">send</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">err</span><span style="color: #f8f8f2">)</span>
+        <span style="color: #f8f8f2">}</span>
+        <span style="color: #66d9ef">else</span><span style="color: #f8f8f2">{</span>
+            <span style="color: #a6e22e">res</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">send</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">JSON</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">stringify</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">response</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">null</span><span style="color: #f8f8f2">,</span> <span style="color: #ae81ff">2</span><span style="color: #f8f8f2">));</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">});</span>
+</pre></div>
+<br />
+<strong>2. Upload Solr Configuration</strong><br />
+The response includes <code>cluster_id</code> and the cluster <code>availability</code> status. The cluster must be ready before you can use it. it takes about few minutes to become ready
+but you can check the status through API.</p>
 
-<li><p>Index (Add) Documents</p></li>
+<p>After cluster become ready and before you can create collections you need to configure your cluster.
+The Solr configuration identifies how to index the documents so that you can search the important fields.
+you can download the sample solr config from <a href="/data/post/qa-system-watson/solar_config.zip">here</a>
+I may write separate post about solar config latter.
+you can upload one or many configuration to your retrieve and rank service.
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">    <span style="color: #66d9ef">var</span> <span style="color: #a6e22e">params</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #a6e22e">cluster_id</span><span style="color: #f92672">:</span> <span style="color: #a6e22e">req</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">query</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">id</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #a6e22e">config_name</span><span style="color: #f92672">:</span> <span style="color: #e6db74">&#39;mindvalley_config&#39;</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #a6e22e">config_zip_path</span><span style="color: #f92672">:</span> <span style="color: #e6db74">&#39;./public/data/solr_config.zip&#39;</span>
+    <span style="color: #f8f8f2">};</span>
 
-<li><p>Create Ground Truth</p></li>
+    <span style="color: #a6e22e">conf</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">retrieve_and_rank</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">uploadConfig</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">params</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #66d9ef">function</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">err</span><span style="color: #f8f8f2">,</span> <span style="color: #a6e22e">response</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">err</span><span style="color: #f8f8f2">){</span>
+                <span style="color: #a6e22e">console</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">log</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&#39;error:&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #a6e22e">err</span><span style="color: #f8f8f2">);</span>
+                <span style="color: #a6e22e">res</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">send</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">err</span><span style="color: #f8f8f2">)</span>
+            <span style="color: #f8f8f2">}</span>
+            <span style="color: #66d9ef">else</span><span style="color: #f8f8f2">{</span>
+                <span style="color: #a6e22e">console</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">log</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">JSON</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">stringify</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">response</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">null</span><span style="color: #f8f8f2">,</span> <span style="color: #ae81ff">2</span><span style="color: #f8f8f2">));</span>
+                <span style="color: #a6e22e">res</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">send</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">JSON</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">stringify</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">response</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">null</span><span style="color: #f8f8f2">,</span> <span style="color: #ae81ff">2</span><span style="color: #f8f8f2">));</span>
+            <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">});</span>
+</pre></div>
+<br />
+<strong>3. Create Collection</strong><br />
+A Solr collection is a logical index of the data in your documents. A collection is a way to keep data separate in the cloud.
+you need to assign one of the uploaded configuration to your collection
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">    <span style="color: #66d9ef">var</span> <span style="color: #a6e22e">params</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #a6e22e">cluster_id</span><span style="color: #f92672">:</span> <span style="color: #e6db74">&#39;{cluster id you have from step 1}&#39;</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #a6e22e">config_name</span><span style="color: #f92672">:</span> <span style="color: #e6db74">&#39;{config name which is uploaded in step 2}&#39;</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #a6e22e">collection_name</span><span style="color: #f92672">:</span> <span style="color: #e6db74">&#39;{collection name}&#39;</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #a6e22e">wt</span><span style="color: #f92672">:</span> <span style="color: #e6db74">&#39;json&#39;</span>
+    <span style="color: #f8f8f2">};</span>
 
-<li><p>Build Training Data</p></li>
+    <span style="color: #a6e22e">conf</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">retrieve_and_rank</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">createCollection</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">params</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #66d9ef">function</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">err</span><span style="color: #f8f8f2">,</span> <span style="color: #a6e22e">response</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">err</span><span style="color: #f8f8f2">){</span>
+                <span style="color: #a6e22e">console</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">log</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&#39;error:&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #a6e22e">err</span><span style="color: #f8f8f2">);</span>
+                <span style="color: #a6e22e">res</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">send</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">err</span><span style="color: #f8f8f2">);</span>
+            <span style="color: #f8f8f2">}</span>
+            <span style="color: #66d9ef">else</span><span style="color: #f8f8f2">{</span>
+                <span style="color: #a6e22e">console</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">log</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">JSON</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">stringify</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">response</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">null</span><span style="color: #f8f8f2">,</span> <span style="color: #ae81ff">2</span><span style="color: #f8f8f2">));</span>
+                <span style="color: #a6e22e">res</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">send</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">JSON</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">stringify</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">response</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">null</span><span style="color: #f8f8f2">,</span> <span style="color: #ae81ff">2</span><span style="color: #f8f8f2">));</span>
+            <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">});</span>
+</pre></div>
 
-<li><p>Create and Train The Ranker</p></li>
+<strong>4. Index (Add) Documents</strong><br />
+Now everything is ready to index (add) the question and answers generated by <em>Document Conversion</em> service into the collection.</p>
 
-<li><p>Rank The Result</p></li>
-</ol>
+<p><div class="highlight" style="background: #272822"><pre style="line-height: 125%">    <span style="color: #a6e22e">jsonfile</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">readFile</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&#39;./public/data/data.json&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">function</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">err</span><span style="color: #f8f8f2">,</span> <span style="color: #a6e22e">obj</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #a6e22e">obj</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">obj</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">answer_units</span>
+    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">i</span> <span style="color: #66d9ef">in</span> <span style="color: #a6e22e">obj</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+
+        <span style="color: #66d9ef">var</span> <span style="color: #a6e22e">doc</span> <span style="color: #f92672">=</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #e6db74">&quot;id&quot;</span><span style="color: #f92672">:</span> <span style="color: #a6e22e">obj</span><span style="color: #f8f8f2">[</span><span style="color: #a6e22e">i</span><span style="color: #f8f8f2">].</span><span style="color: #a6e22e">id</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;body&quot;</span><span style="color: #f92672">:</span> <span style="color: #a6e22e">obj</span><span style="color: #f8f8f2">[</span><span style="color: #a6e22e">i</span><span style="color: #f8f8f2">].</span><span style="color: #a6e22e">content</span><span style="color: #f8f8f2">[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">].</span><span style="color: #a6e22e">text</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">&quot;title&quot;</span><span style="color: #f92672">:</span> <span style="color: #a6e22e">obj</span><span style="color: #f8f8f2">[</span><span style="color: #a6e22e">i</span><span style="color: #f8f8f2">].</span><span style="color: #a6e22e">title</span>
+        <span style="color: #f8f8f2">}</span>
+
+        <span style="color: #a6e22e">solrClient</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">add</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">doc</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">function</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">err</span><span style="color: #f8f8f2">,</span> <span style="color: #a6e22e">response</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">err</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #a6e22e">console</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">log</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&#39;Error indexing document: &#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #a6e22e">err</span><span style="color: #f8f8f2">);</span>
+            <span style="color: #f8f8f2">}</span>
+            <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #a6e22e">console</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">log</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&#39;Indexed a document.&#39;</span><span style="color: #f8f8f2">);</span>
+                <span style="color: #a6e22e">solrClient</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">commit</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">function</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">err</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">err</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                        <span style="color: #a6e22e">console</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">log</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&#39;Error committing change: &#39;</span> <span style="color: #f92672">+</span> <span style="color: #a6e22e">err</span><span style="color: #f8f8f2">);</span>
+                    <span style="color: #f8f8f2">}</span>
+                    <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                        <span style="color: #a6e22e">console</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">log</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&#39;Successfully committed changes.&#39;</span><span style="color: #f8f8f2">);</span>
+                    <span style="color: #f8f8f2">}</span>
+                <span style="color: #f8f8f2">});</span>
+            <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">});</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">})</span>
+</pre></div>
+
+<strong>5. Create Ground Truth</strong><br />
+Ground truth is the collection of questions that are matched to answers. For the Retrieve and Rank service,
+you label the answers with their relevance to the question. The relevance label helps the ranker determine which features are the most useful.
+The questions, answers, and relevance labels are combined to create training data. we need to upload the training data to create and train a ranker.<br />
+The quality of training set is very important. Your training data need to have following quality criteria to be effective
+in improving the relevance of answers that are returned from the Retrieve and Rank service:</p>
+
+<ul>
+<li>The file must contain at least 49 unique questions.<br /></li>
+<li>The number of records must be at least 50 times the number of fields that are identified in your Solr configuration. For example, if your collection defines five fields, you must have at least 250 records in your training data.<br /></li>
+<li>At least two different relevance labels must exist in the data and those labels must be well represented. A label is well represented if it occurs at least once for every 100 unique questions.<br /></li>
+</ul>
+
+<p>The relevance file that we need to use in next step it suppose to be in the following CSV format:
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">  <span style="color: #e6db74">&quot;{question}&quot;</span><span style="color: #f8f8f2">,</span><span style="color: #e6db74">&quot;{answer_id1}&quot;</span><span style="color: #f8f8f2">,</span><span style="color: #e6db74">&quot;{relevance_label1}&quot;</span><span style="color: #f8f8f2">,</span><span style="color: #e6db74">&quot;{answer_id2}&quot;</span><span style="color: #f8f8f2">,</span><span style="color: #e6db74">&quot;{relevance_label2}&quot;</span><span style="color: #f8f8f2">,</span><span style="color: #e6db74">&quot;{...}&quot;</span>
+</pre></div>
+</p>
+
+<ul>
+<li>The answer ID is the unique key of a document which is indexed into your collection.<br /></li>
+
+<li><p>The relevance label is a non-negative integer (between zero and some upper limit). Higher numbers indicate higher relevance.<br />
+For example:</p>
+
+<p>&ldquo;what similarity laws must be obeyed.&rdquo;,&ldquo;184&rdquo;,&ldquo;3&rdquo;,&ldquo;29&rdquo;,&ldquo;3&rdquo;,&ldquo;31&rdquo;,&ldquo;3&rdquo;
+&ldquo;what are the structural and aeroelastic problems.&rdquo;,&ldquo;12&rdquo;,&ldquo;4&rdquo;,&ldquo;15&rdquo;,&ldquo;3&rdquo;
+&ldquo;material properties of photoelastic materials.&rdquo;,&ldquo;463&rdquo;,&ldquo;4&rdquo;,&ldquo;462&rdquo;,&ldquo;2&rdquo;,&ldquo;497&rdquo;,&ldquo;0&rdquo;</p></li>
+</ul>
+
+<p><strong>6  Build Training Data &amp; Ranker</strong><br />
+Good news is you are almost down :). IBM Watson team provide the python scripts which create a training set based on your ground truth csv.
+The <a href="/data/post/qa-system-watson/train.py">train.py</a> Python script file takes the following format as input:</p>
+
+<pre><code>train.py -u {username:password} -i {relevance_file} -c {cluster_id} -x {collection_name}\
+[-r {solr_rows_per_query}] [-n {ranker_name}]
+</code></pre>
+
+<p>The script creates a file in your working directory called trainingdata.txt.
+That file is used to create the ranker.
+When the script is finished, the script window displays a new ranker ID and its status.
+We&rsquo;ll need it when we rerank results at runtime.</p>
+
+<p><strong>7  Time for ask question</strong></p>
+
+<p>Let&rsquo;s test the system. you can search your collection with or without ranker.
+searching without ranker is useful to create a ground truth.</p>
+
+<ul>
+<li><p>search without ranker (search solar standard)
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">    <span style="color: #66d9ef">var</span> <span style="color: #a6e22e">params</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #a6e22e">cluster_id</span><span style="color: #f92672">:</span> <span style="color: #a6e22e">req</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">query</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">id</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #a6e22e">collection_name</span><span style="color: #f92672">:</span> <span style="color: #e6db74">&#39;mindvalley_collection&#39;</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #a6e22e">wt</span><span style="color: #f92672">:</span> <span style="color: #e6db74">&#39;json&#39;</span><span style="color: #f8f8f2">,</span>
+
+    <span style="color: #f8f8f2">};</span>
+    
+    <span style="color: #a6e22e">solrClient</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">conf</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">retrieve_and_rank</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">createSolrClient</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">params</span><span style="color: #f8f8f2">);</span>
+
+    <span style="color: #a6e22e">console</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">log</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&#39;Searching all documents.&#39;</span><span style="color: #f8f8f2">);</span>
+
+    <span style="color: #66d9ef">var</span> <span style="color: #a6e22e">query</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">solrClient</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">createQuery</span><span style="color: #f8f8f2">();</span>
+    <span style="color: #a6e22e">query</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">q</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">req</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">query</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">query</span><span style="color: #f8f8f2">);</span>
+    <span style="color: #a6e22e">query</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">start</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">req</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">query</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">start</span><span style="color: #f8f8f2">)</span>
+
+    <span style="color: #a6e22e">solrClient</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">search</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">query</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">function</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">err</span><span style="color: #f8f8f2">,</span> <span style="color: #a6e22e">searchResponse</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">err</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #a6e22e">console</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">log</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&#39;Error searching for documents: &#39;</span> <span style="color: #f92672">+</span> <span style="color: #a6e22e">err</span><span style="color: #f8f8f2">);</span>
+            <span style="color: #a6e22e">res</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">send</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">JSON</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">stringify</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">err</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">null</span><span style="color: #f8f8f2">,</span> <span style="color: #ae81ff">2</span><span style="color: #f8f8f2">));</span>
+        <span style="color: #f8f8f2">}</span>
+        <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #a6e22e">console</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">log</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&#39;Found &#39;</span> <span style="color: #f92672">+</span> <span style="color: #a6e22e">searchResponse</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">response</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">numFound</span> <span style="color: #f92672">+</span> <span style="color: #e6db74">&#39; documents.&#39;</span><span style="color: #f8f8f2">);</span>
+            <span style="color: #a6e22e">res</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">send</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">JSON</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">stringify</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">searchResponse</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">response</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">docs</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">null</span><span style="color: #f8f8f2">,</span> <span style="color: #ae81ff">2</span><span style="color: #f8f8f2">));</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">});</span>
+</pre></div>
+</p></li>
+
+<li><p>Search With Ranker
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">    <span style="color: #66d9ef">var</span> <span style="color: #a6e22e">params</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #a6e22e">cluster_id</span><span style="color: #f92672">:</span> <span style="color: #a6e22e">req</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">query</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">id</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #a6e22e">collection_name</span><span style="color: #f92672">:</span> <span style="color: #e6db74">&#39;example_collection&#39;</span>
+    <span style="color: #f8f8f2">};</span>
+    
+    <span style="color: #66d9ef">var</span> <span style="color: #a6e22e">qs</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">require</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&#39;qs&#39;</span><span style="color: #f8f8f2">);</span>
+    
+    <span style="color: #a6e22e">solrClient</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">conf</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">retrieve_and_rank</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">createSolrClient</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">params</span><span style="color: #f8f8f2">);</span>
+
+    <span style="color: #66d9ef">var</span> <span style="color: #a6e22e">ranker_id</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">req</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">query</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">ranker_id</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #66d9ef">var</span> <span style="color: #a6e22e">question</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">&#39;q=what is the basic mechanism of the transonic aileron buzz&#39;</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #66d9ef">var</span> <span style="color: #a6e22e">query</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">qs</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">stringify</span><span style="color: #f8f8f2">({</span><span style="color: #a6e22e">q</span><span style="color: #f92672">:</span> <span style="color: #a6e22e">question</span><span style="color: #f8f8f2">,</span> <span style="color: #a6e22e">ranker_id</span><span style="color: #f92672">:</span> <span style="color: #a6e22e">ranker_id</span><span style="color: #f8f8f2">,</span> <span style="color: #a6e22e">fl</span><span style="color: #f92672">:</span> <span style="color: #e6db74">&#39;id,title&#39;</span><span style="color: #f8f8f2">});</span>
+
+    <span style="color: #a6e22e">solrClient</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">get</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&#39;fcselect&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #a6e22e">query</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">function</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">err</span><span style="color: #f8f8f2">,</span> <span style="color: #a6e22e">searchResponse</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">err</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #a6e22e">console</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">log</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&#39;Error searching for documents: &#39;</span> <span style="color: #f92672">+</span> <span style="color: #a6e22e">err</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #f8f8f2">}</span>
+        <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #a6e22e">console</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">log</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">JSON</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">stringify</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">searchResponse</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">response</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">docs</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">null</span><span style="color: #f8f8f2">,</span> <span style="color: #ae81ff">2</span><span style="color: #f8f8f2">));</span>
+            <span style="color: #a6e22e">res</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">send</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">JSON</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">stringify</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">searchResponse</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">response</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">docs</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">null</span><span style="color: #f8f8f2">,</span> <span style="color: #ae81ff">2</span><span style="color: #f8f8f2">));</span>
+
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">});</span>
+</pre></div>
+</p></li>
+</ul>
+
+<p><strong>8 Help me to learn more</strong><br />
+you can collect the user satisfaction level, regarding to the system answers in order to train your system and improve the results.
+you can update your ground truth based on user input and repeat step 6.</p>
  </p>
 
             <ul id="tags">
