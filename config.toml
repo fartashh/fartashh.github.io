@@ -19,7 +19,7 @@ disqusShortname = "fartashh"
 		avatar = "avatar.jpg"
 		# Use Markdown to format the string. This works nearly all over the theme
 		title = "I <3 data and Ghorme Sabzi :)"
-		bio = "I am a senior software engineer with huge interest in data science and machine learning. I'm working as Data Scientist and Developer at Mindvalley, where I get the chance to build scalable app with python and node.js to convert data into products. Beside that, I mentor students in programming and data science."
+		bio = "I am a software engineer with huge interest in data science and machine learning. I'm working as Data Scientist and Developer at Mindvalley, where I get the chance to build scalable app with python and node.js to convert data into products. Beside that, I mentor students in programming and data science."
 		# The icons will be shown if you enter your username
 		twitter = "fartashh"
 		github = "fartashh"
