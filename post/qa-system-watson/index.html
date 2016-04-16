@@ -33,7 +33,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <div class='my-name'>Fartash Haghani</div>
   <div class='my-position'>Software Enginer | Data Scientist</div>
     <p class='bio'>I &lt;3 data and Ghorme Sabzi :)</p>
-	<p class='bio'>I am a senior software engineer with huge interest in data science and machine learning. I&rsquo;m working as Data Scientist and Developer at Mindvalley, where I get the chance to build scalable app with python and node.js to convert data into products. Beside that, I mentor students in programming and data science.</p>
+	<p class='bio'>I am a software engineer with huge interest in data science and machine learning. I&rsquo;m working as Data Scientist and Developer at Mindvalley, where I get the chance to build scalable app with python and node.js to convert data into products. Beside that, I mentor students in programming and data science.</p>
 </header>
 
 
@@ -44,15 +44,23 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
             <p> 
 
-<p>Recently I started a new project to build QA system for Mindvalley. After a short discussion with my colleagues we decided
-to use the 2011 jeopardy winner <em>Watson</em>.</p>
+<p>
+<figure class="align-center">
+    
+        <img src="/images/post/qa-system-watson/watson.png"  />
+    
+    
+</figure>
 
-<p>As you may know Watson is a question answering computer system capable of answering questions posed in natural language,
-it developed in IBM&rsquo;s DeepQA project by a research team led by principal investigator David Ferrucci.</p>
-
-<p>IBM also released it&rsquo;s cloud platform <em>IBM Bluemix</em> in 2014. It supports several programming languages and services
+Recently I started a new project to build QA system for Mindvalley. After a short discussion with my colleagues we decided
+to use the 2011 jeopardy winner (<strong>Watson</strong>).<br />
+As you may know Watson is a question answering computer system capable of answering questions posed in natural language,
+it developed in IBM&rsquo;s DeepQA project by a research team led by principal investigator David Ferrucci.<br />
+IBM also released it&rsquo;s cloud platform <em>IBM Bluemix</em> in 2014. It supports several programming languages and services
 as well as integrated DevOps to build, run, deploy and manage applications on the cloud.
 And of-course Watson API&rsquo;s are accessible in Bluemix platform.</p>
+
+<p><code>{&quot;status&quot;:&quot;in_progress&quot;}</code></p>
 
 <h2 id="before-you-begin:6bb7f442dc162763233a48477a1fafee">Before you begin</h2>
 
@@ -64,7 +72,146 @@ And of-course Watson API&rsquo;s are accessible in Bluemix platform.</p>
 <li>Python</li>
 </ul>
 
-<h2 id="overview-of-questin-answer-system:6bb7f442dc162763233a48477a1fafee">Overview of Questin Answer System</h2>
+<h2 id="overview-of-question-answer-system:6bb7f442dc162763233a48477a1fafee">Overview of Question Answer System</h2>
+
+<p>The final goal is simple; design and develop an application be able to:</p>
+
+<ul>
+<li>Analyze unstructured data</li>
+<li>Understands complex questions</li>
+<li>Presents answers and solution</li>
+</ul>
+
+<p><img src="/images/post/qa-system-watson/overview-concept.png" alt="" /></p>
+
+<p>But unfortunately, it is not as easy as advertised by IBM. In past IBM offered IBM Watson Question and Answer (QA)
+  but in summer of 2015 this service replaced by four new services to support customize and embed Q&amp;A applications.<br />
+  The four replacement services recommended for different types of question and answer capabilities are:</p>
+
+<p><img src="/images/post/qa-system-watson/classifier.png" alt="" />
+<a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/nl-classifier.html">Natural Language Classifier</a> – allows you to Interpret and classify natural language with confidence.</p>
+
+<p><img src="/images/post/qa-system-watson/Dialog.png" alt="" />
+<a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/dialog.html">Dialog</a> – allows you to script a conversation and help walk a user through a process</p>
+
+<p><img src="/images/post/qa-system-watson/retriveandrank.png" alt="" />
+<a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/retrieve-rank.html">Retrieve and Rank</a> – allows information retrieval with a machine learning model</p>
+
+<p><img src="/images/post/qa-system-watson/passage.png" alt="" />
+<a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/document-conversion.html">Document Conversion</a> – takes documents and ‘chunks them up” into smaller answer units to return as passages</p>
+
+<p>based on your input data and requirements, you can choose one or combinations of these services to build a comprehensive and robust system.</p>
+
+<h2 id="my-approach:6bb7f442dc162763233a48477a1fafee">My Approach</h2>
+
+<p>I decide to use combination of <code>Document Conversion</code> and <code>Retrieve and Rank</code> Services. Document conversion service used to transform documents into <code>Answer Units</code>, and use those as input to
+ train the Retrieve and Rank Service.</p>
+
+<p><img src="/images/post/qa-system-watson/activity-diagram.png" alt="" /></p>
+
+<h3 id="bluemix-platform-preparation:6bb7f442dc162763233a48477a1fafee">Bluemix platform preparation</h3>
+
+<p>Before we start you need to prepare and setup your server and services. I decided to deploy my code in Bluemix as well,
+however you can just create your API in bluemix and deploy your code wherever you like (AWS :))</p>
+
+<p>Login into you Bluemix account, in dashboard click on <code>Service and APIs</code>
+you need to create two services <code>Document Conversion</code> and <code>Retrieve and Rank</code> and copy and paste the credentials. (it is pretty easy I am not going to explain it)</p>
+
+<p><img src="/images/post/qa-system-watson/bluemixApis.png" alt="" /></p>
+
+<h3 id="document-preparation:6bb7f442dc162763233a48477a1fafee">Document Preparation</h3>
+
+<p>The first and most important step is document preparation. The more disciplined you are in your handling of data, the more consistent and better results you are like likely to achieve. Watson
+  <em>Document Conversion</em> service helps you in this process so you don&rsquo;t need to do it manually but we need to prepare our document for DC service.
+  You may ask how you can prepare a document? the answer is by providing related question as header of each paragraph.
+  DC service is sensitive to headers, it transform document to json format which contains list of <code>answer_units</code> dictionary. look at following example;</p>
+
+<ul>
+<li><p><strong>Document Sample</strong></p>
+
+<pre><code>   What is Watson?
+   Watson is an artificially intelligent computer system capable of answering questions
+   posed in natural language, developed in IBM&amp;#39;s DeepQA project by a research team led
+   by principal investigator David Ferrucci. Watson was named after IBM&amp;#39;s first CEO and
+   industrialist Thomas J. Watson. The computer system was specifically developed to
+   answer questions on the quiz show Jeopardy! In 2011, Watson competed on Jeopardy!
+   against former winners Brad Rutter and Ken Jennings. Watson received the first place
+   prize of $1 million.
+
+
+   How did it Work?
+   Watson had access to 200 million pages of structured and unstructured content
+   consuming four terabytes of disk storage including the full text of Wikipedia, but was not
+   connected to the Internet during the game. For each clue, Watson&amp;#39;s three most probable
+   responses were displayed on the television screen. Watson consistently outperformed
+   its human opponents on the game&amp;#39;s signaling device, but had trouble responding to a
+   few categories, notably those having short clues containing only a few words.
+
+
+   And then, what happened?
+   In February 2013, IBM announced that Watson software system&amp;#39;s first commercial
+   application would be for utilization management decisions in lung cancer treatment at
+   Memorial Sloan–Kettering Cancer Center in conjunction with health insurance company
+   WellPoint. IBM Watson&amp;#39;s former business chief Manoj Saxena says that 90% of nurses
+   in the field who use Watson now follow its guidance.
+</code></pre></li>
+
+<li><p><strong>Answer Units</strong></p></li>
+</ul>
+
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"> 
+ <span style="color: #f8f8f2">{</span>
+   <span style="color: #f92672">&quot;source_document_id&quot;</span><span style="color: #f8f8f2">:</span><span style="color: #e6db74">&quot;&quot;</span><span style="color: #f8f8f2">,</span>
+   <span style="color: #f92672">&quot;timestamp&quot;</span><span style="color: #f8f8f2">:</span><span style="color: #e6db74">&quot;2016-04-15T08:42:37.055Z&quot;</span><span style="color: #f8f8f2">,</span>
+   <span style="color: #f92672">&quot;media_type_detected&quot;</span><span style="color: #f8f8f2">:</span><span style="color: #e6db74">&quot;application/wordprocessingml.document&quot;</span><span style="color: #f8f8f2">,</span>
+   <span style="color: #f92672">&quot;metadata&quot;</span><span style="color: #f8f8f2">:[{</span><span style="color: #f92672">&quot;name&quot;</span><span style="color: #f8f8f2">:</span><span style="color: #e6db74">&quot;Content-Type&quot;</span><span style="color: #f8f8f2">,</span><span style="color: #f92672">&quot;content&quot;</span><span style="color: #f8f8f2">:</span><span style="color: #e6db74">&quot;text/html; charset=UTF-8&quot;</span><span style="color: #f8f8f2">},</span>
+               <span style="color: #f8f8f2">{</span><span style="color: #f92672">&quot;name&quot;</span><span style="color: #f8f8f2">:</span><span style="color: #e6db74">&quot;author&quot;</span><span style="color: #f8f8f2">,</span><span style="color: #f92672">&quot;content&quot;</span><span style="color: #f8f8f2">:</span><span style="color: #e6db74">&quot;Eva Luo&quot;</span><span style="color: #f8f8f2">},</span>
+               <span style="color: #f8f8f2">{</span><span style="color: #f92672">&quot;name&quot;</span><span style="color: #f8f8f2">:</span><span style="color: #e6db74">&quot;publicationdate&quot;</span><span style="color: #f8f8f2">,</span><span style="color: #f92672">&quot;content&quot;</span><span style="color: #f8f8f2">:</span><span style="color: #e6db74">&quot;2015-08-20&quot;</span><span style="color: #f8f8f2">}],</span>
+   <span style="color: #f92672">&quot;answer_units&quot;</span><span style="color: #f8f8f2">:[</span>
+         <span style="color: #f8f8f2">{</span>
+            <span style="color: #f92672">&quot;id&quot;</span><span style="color: #f8f8f2">:</span><span style="color: #e6db74">&quot;ff4da46f-b07a-4c12-aa2d-d5b0d3414c17&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #f92672">&quot;type&quot;</span><span style="color: #f8f8f2">:</span><span style="color: #e6db74">&quot;h3&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #f92672">&quot;parent_id&quot;</span><span style="color: #f8f8f2">:</span><span style="color: #e6db74">&quot;&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #f92672">&quot;title&quot;</span><span style="color: #f8f8f2">:</span><span style="color: #e6db74">&quot;What is Watson?&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #f92672">&quot;direction&quot;</span><span style="color: #f8f8f2">:</span><span style="color: #e6db74">&quot;ltr&quot;</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #f92672">&quot;content&quot;</span><span style="color: #f8f8f2">:[</span>
+               <span style="color: #f8f8f2">{</span>
+                <span style="color: #f92672">&quot;media_type&quot;</span><span style="color: #f8f8f2">:</span><span style="color: #e6db74">&quot;text/plain&quot;</span><span style="color: #f8f8f2">,</span>
+                <span style="color: #f92672">&quot;text&quot;</span><span style="color: #f8f8f2">:</span><span style="color: #e6db74">&quot;Watson is an artificially intelligent computer ...&quot;</span>
+               <span style="color: #f8f8f2">}</span>
+               <span style="color: #f8f8f2">]}],</span>
+   <span style="color: #f92672">&quot;warnings&quot;</span><span style="color: #f8f8f2">:[]</span>
+   <span style="color: #f8f8f2">}</span> 
+</pre></div>
+
+
+<p>Now we can use list of answer units for training Retrieve and Rank system.</p>
+
+<h3 id="setup-retrieve-and-rank-system:6bb7f442dc162763233a48477a1fafee">Setup Retrieve and Rank System</h3>
+
+<p>This service helps users find the most relevant information for their query by using a combination of search and machine
+learning algorithms to detect &ldquo;signals&rdquo; in the data. Built on top of Apache Solr, developers load their data into the service,
+train a machine learning model based on known relevant results, then leverage this model to provide improved results to their end users based on their question or query.</p>
+
+<p>Lets makes our hands dirty. if you have worked with Solr before, you may know we need our cluster and collection to index the data, so the let&rsquo;s setup them.
+I used Node.js for this project before you start you need to install</p>
+
+<ol>
+<li><p>Create Cluster
+To use the Retrieve and Rank service, you must create a Solr cluster. A Solr cluster manages your search collections, which you will create later.</p></li>
+
+<li><p>Create Collection</p></li>
+
+<li><p>Index (Add) Documents</p></li>
+
+<li><p>Create Ground Truth</p></li>
+
+<li><p>Build Training Data</p></li>
+
+<li><p>Create and Train The Ranker</p></li>
+
+<li><p>Rank The Result</p></li>
+</ol>
  </p>
 
             <ul id="tags">
