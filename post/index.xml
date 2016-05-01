@@ -6,8 +6,283 @@
     <description>Recent content in Posts on Fartash</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 14 Apr 2016 15:46:49 +0800</lastBuildDate>
+    <lastBuildDate>Sat, 30 Apr 2016 16:58:56 +0800</lastBuildDate>
     <atom:link href="http://fartashh.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>How to Calculate Monthly Recurring Revenue (MRR)</title>
+      <link>http://fartashh.github.io/post/how-calculate-mrr/</link>
+      <pubDate>Sat, 30 Apr 2016 16:58:56 +0800</pubDate>
+      
+      <guid>http://fartashh.github.io/post/how-calculate-mrr/</guid>
+      <description>
+
+&lt;p&gt;
+&lt;figure class=&#34;align-center&#34;&gt;
+    
+        &lt;img src=&#34;http://fartashh.github.io/images/post/how-calculate-mrr/mrr.jpg&#34;  /&gt;
+    
+    
+&lt;/figure&gt;
+
+Monthly Recurring Revenue is one of the most important metrics you need for measuring health of your subscription business.
+Recently I have done comprehensive research to find out how to calculate MRR. Although I have found so many good definitions but I haven&amp;rsquo;t
+found any practical one. In this post I will explain how to calculate MRR by using one of my favourite python libraries (Pandas).&lt;/p&gt;
+
+&lt;h2 id=&#34;what-is-mrr-and-how-calculate-it:ba0954b7732428216be787aa07f18b1d&#34;&gt;What is MRR and How calculate it?&lt;/h2&gt;
+
+&lt;p&gt;Before we start, let&amp;rsquo;s define MRR. Zuora defines MRR as bellow;&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Monthly recurring revenue (MRR) is a dollar amount derived from a company’s total annual recurring revenue (ARR), normalized to a monthly value. In its simplest form, MRR is the money paid monthly for a subscription to a product or service. Properly used, it can provide valuable, unique insight into sales and cash flow dynamics.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;In order to understand it better, let&amp;rsquo;s look at the following example;&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;A new $120,000 annual contract starts on April 1, 2016 and ends on April 1, 2017.
+The question is How much Monthly Recurring Revenue was added and when?&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;The answer to this question is simple, $10,000 in April 2016, specifically April 1, 2016. In other word; if no one else subscribe,
+the MRR form April 2016 till 2017 is $10,000.&lt;/p&gt;
+
+
+&lt;figure class=&#34;align-center&#34;&gt;
+    
+        &lt;img src=&#34;http://fartashh.github.io/images/post/how-calculate-mrr/example.png&#34;  /&gt;
+    
+    
+&lt;/figure&gt;
+
+
+&lt;p&gt;According to the example, we need 3 parameters to be able to calculate the MRR;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Subscription start date&lt;br /&gt;&lt;/li&gt;
+&lt;li&gt;Subscription end date&lt;br /&gt;&lt;/li&gt;
+&lt;li&gt;Value you are gonna get every day of month (I like to call it daily MRR but we can call it Monthly Recurring Charge MRC as well)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;mrr-calculation:ba0954b7732428216be787aa07f18b1d&#34;&gt;MRR Calculation&lt;/h2&gt;
+
+&lt;p&gt;calculating MRR for one subscription is clear but what about real world example, in which we have thousands or millions of records.
+I break the process into two simple steps;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;1. Calculate total MRC for each day&lt;/strong&gt;&lt;br /&gt;
+ For instance, if you want to generate report form 1 Jan 2015 till 30 Dec 2015, we need to calculate (TMRC) total sum of MRC for every
+ day of the year.&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;date&lt;/th&gt;
+&lt;th&gt;TMRC&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;01 Jan 2015&lt;/td&gt;
+&lt;td&gt;$180&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;02 Jan 2015&lt;/td&gt;
+&lt;td&gt;$240&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;03 Jan 2015&lt;/td&gt;
+&lt;td&gt;$590&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;&amp;hellip;&lt;/td&gt;
+&lt;td&gt;&amp;hellip;&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;&amp;hellip;&lt;/td&gt;
+&lt;td&gt;&amp;hellip;&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;27 Dec 2015&lt;/td&gt;
+&lt;td&gt;$2080&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;28 Dec 2015&lt;/td&gt;
+&lt;td&gt;$620&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;29 Dec 2015&lt;/td&gt;
+&lt;td&gt;$900&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;30 Dec 2015&lt;/td&gt;
+&lt;td&gt;$120&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;31 Dec 2015&lt;/td&gt;
+&lt;td&gt;$780&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;TMRC of &lt;code&gt;nDate&lt;/code&gt; is equal to sum of all MRCs of subscriptions which are active and they started in the same day of &lt;code&gt;nDate&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;2. Generate the report&lt;/strong&gt;&lt;br /&gt;
+ Based on data prepared in step 1, we can generate two important reports;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Monthly Recurring Revenue which is equal to sum of all TMRC in one month.&lt;br /&gt;&lt;/li&gt;
+&lt;li&gt;Rolling Monthly Recurring Revenue which is equal to sum of all TMRC of last 30 days.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;case-study:ba0954b7732428216be787aa07f18b1d&#34;&gt;Case study&lt;/h2&gt;
+
+&lt;p&gt;I generate 16137 sample subscription records which you can download from &lt;a href=&#34;http://fartashh.github.io/data/post/how-calculate-mrr/sample-subscription.csv&#34;&gt;here&lt;/a&gt;.
+And you can find the Ipython notebook of following codes &lt;a href=&#34;http://fartashh.github.io/data/post/how-calculate-mrr/MRR-Report.ipynb&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s start to  generate the reports with pandas and matplotlib.&lt;/p&gt;
+
+&lt;h3 id=&#34;load-required-libraries:ba0954b7732428216be787aa07f18b1d&#34;&gt;Load required libraries&lt;/h3&gt;
+
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    &lt;span style=&#34;color: #f92672&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;csv&lt;/span&gt;
+    &lt;span style=&#34;color: #f92672&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;pandas&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;as&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;pd&lt;/span&gt;
+    &lt;span style=&#34;color: #f92672&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;numpy&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;as&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;np&lt;/span&gt;
+    &lt;span style=&#34;color: #f92672&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;datetime&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;timedelta,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;date&lt;/span&gt;
+    &lt;span style=&#34;color: #f92672&#34;&gt;%&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;matplotlib&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;inline&lt;/span&gt;
+    &lt;span style=&#34;color: #f92672&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;matplotlib&lt;/span&gt;
+    &lt;span style=&#34;color: #f92672&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;matplotlib.pyplot&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;as&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;plt&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3 id=&#34;data-preprocessing:ba0954b7732428216be787aa07f18b1d&#34;&gt;Data Preprocessing&lt;/h3&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    &lt;span style=&#34;color: #75715e&#34;&gt;# loading data&lt;/span&gt;
+    &lt;span style=&#34;color: #f8f8f2&#34;&gt;df&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;pd&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;read_csv(&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;sample-subscription.csv&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;)&lt;/span&gt;
+    &lt;span style=&#34;color: #f8f8f2&#34;&gt;report_start_date&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;date(&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;2015&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;)&lt;/span&gt;
+    &lt;span style=&#34;color: #f8f8f2&#34;&gt;report_end_date&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;date(&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;2015&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;12&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;)&lt;/span&gt;
+    
+    &lt;span style=&#34;color: #75715e&#34;&gt;# Data preprocessing &lt;/span&gt;
+    &lt;span style=&#34;color: #f8f8f2&#34;&gt;df&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;fillna(report_end_date,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;inplace&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;True)&lt;/span&gt;
+    &lt;span style=&#34;color: #f8f8f2&#34;&gt;df[&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;subscription_start_date&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;pd&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;to_datetime(df[&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;subscription_start_date&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;],&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;format&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;%Y-%m-%d&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;)&lt;/span&gt;
+    &lt;span style=&#34;color: #f8f8f2&#34;&gt;df[&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;subscription_end_date&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;pd&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;to_datetime(df[&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;subscription_end_date&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;],&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;format&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;%Y-%m-%d&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;h3 id=&#34;calculate-tmrc-for-each-day:ba0954b7732428216be787aa07f18b1d&#34;&gt;Calculate TMRC for each day&lt;/h3&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    &lt;span style=&#34;color: #75715e&#34;&gt;# Helper function &lt;/span&gt;
+    &lt;span style=&#34;color: #66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;daterange&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(start_date,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;end_date):&lt;/span&gt;
+        &lt;span style=&#34;color: #66d9ef&#34;&gt;for&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;n&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;range(int&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;((end_date&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;-&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;start_date)&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;days)):&lt;/span&gt;
+            &lt;span style=&#34;color: #66d9ef&#34;&gt;yield&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;start_date&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;timedelta(n)&lt;/span&gt;
+    
+    &lt;span style=&#34;color: #75715e&#34;&gt;# calculate tmrc for every day         &lt;/span&gt;
+    &lt;span style=&#34;color: #f8f8f2&#34;&gt;daily_mrr&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;[]&lt;/span&gt;
+    &lt;span style=&#34;color: #66d9ef&#34;&gt;for&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;my_date&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;daterange(report_start_date,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;report_end_date):&lt;/span&gt;
+        &lt;span style=&#34;color: #f8f8f2&#34;&gt;my_date_df&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;df[(df[&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;subscription_end_date&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;]&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;&amp;gt;=&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;my_date&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;)&lt;/span&gt; 
+                        &lt;span style=&#34;color: #f92672&#34;&gt;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;(df[&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;subscription_start_date&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;]&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;&amp;lt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;my_date)&lt;/span&gt; 
+                        &lt;span style=&#34;color: #f92672&#34;&gt;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;(df[&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;subscription_start_date&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;]&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;apply(&lt;/span&gt;&lt;span style=&#34;color: #66d9ef&#34;&gt;lambda&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;x:&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;x&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;day)&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;my_date&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;day)]&lt;/span&gt;
+        &lt;span style=&#34;color: #f8f8f2&#34;&gt;tmrc&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;my_date_df[&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;dmrc&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;]&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;sum()&lt;/span&gt;
+        &lt;span style=&#34;color: #f8f8f2&#34;&gt;daily_mrr&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;append({&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;date&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:my_date,&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;mrc&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:tmrc})&lt;/span&gt;
+        
+    &lt;span style=&#34;color: #75715e&#34;&gt;# Visualization&lt;/span&gt;
+    &lt;span style=&#34;color: #f8f8f2&#34;&gt;dates&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;matplotlib&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;dates&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;date2num([x[&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;date&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color: #66d9ef&#34;&gt;for&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;x&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;daily_mrr])&lt;/span&gt;
+    &lt;span style=&#34;color: #f8f8f2&#34;&gt;y&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;[x[&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;mrc&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color: #66d9ef&#34;&gt;for&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;x&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;daily_mrr]&lt;/span&gt;
+    &lt;span style=&#34;color: #f8f8f2&#34;&gt;plt&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;figure(figsize&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;100&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;20&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;))&lt;/span&gt;
+    &lt;span style=&#34;color: #f8f8f2&#34;&gt;plt&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;plot_date(dates,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;y,&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;-&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;)&lt;/span&gt;
+    &lt;span style=&#34;color: #f8f8f2&#34;&gt;plt&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;rc(&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;font&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;**&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;{&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;family&amp;#39;&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;normal&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;
+            &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;weight&amp;#39;&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;bold&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;
+            &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;size&amp;#39;&lt;/span&gt;   &lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;40&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;})&lt;/span&gt;
+    &lt;span style=&#34;color: #f8f8f2&#34;&gt;plt&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;show()&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;
+&lt;figure class=&#34;align-center&#34;&gt;
+    
+        &lt;img src=&#34;http://fartashh.github.io/images/post/how-calculate-mrr/output_7_0.png&#34;  /&gt;
+    
+    
+&lt;/figure&gt;
+&lt;/p&gt;
+
+&lt;h3 id=&#34;generate-reports:ba0954b7732428216be787aa07f18b1d&#34;&gt;Generate Reports&lt;/h3&gt;
+
+&lt;p&gt;since we have our daily MRR data, we can group it by Monthly or Weekly.&lt;/p&gt;
+
+&lt;h4 id=&#34;monthly-mrr:ba0954b7732428216be787aa07f18b1d&#34;&gt;Monthly MRR&lt;/h4&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    &lt;span style=&#34;color: #f8f8f2&#34;&gt;df&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;pd&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;DataFrame(daily_mrr)&lt;/span&gt;
+    &lt;span style=&#34;color: #f8f8f2&#34;&gt;df&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;df&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;set_index(pd&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;DatetimeIndex(df[&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;date&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;]))&lt;/span&gt;
+    &lt;span style=&#34;color: #75715e&#34;&gt;# group by dataframe Monthly&lt;/span&gt;
+    &lt;span style=&#34;color: #f8f8f2&#34;&gt;g_df&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;df&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;groupby(pd&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;TimeGrouper(&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;m&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;))&lt;/span&gt;
+    &lt;span style=&#34;color: #f8f8f2&#34;&gt;res&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;g_df&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;sum()&lt;/span&gt;
+    &lt;span style=&#34;color: #f8f8f2&#34;&gt;res&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;sort_index()&lt;/span&gt;
+    &lt;span style=&#34;color: #f8f8f2&#34;&gt;res[&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;date&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;]&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;res&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;index&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;to_datetime()&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    &lt;span style=&#34;color: #f8f8f2&#34;&gt;dates&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;matplotlib&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;dates&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;date2num(res&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;index&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;to_pydatetime())&lt;/span&gt;
+    &lt;span style=&#34;color: #f8f8f2&#34;&gt;y&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;res[&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;mrc&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;]&lt;/span&gt;
+    &lt;span style=&#34;color: #f8f8f2&#34;&gt;plt&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;figure(figsize&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;100&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;20&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;))&lt;/span&gt;
+    &lt;span style=&#34;color: #f8f8f2&#34;&gt;plt&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;plot_date(dates,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;y,&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;-&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;)&lt;/span&gt;
+    &lt;span style=&#34;color: #f8f8f2&#34;&gt;plt&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;rc(&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;font&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;**&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;{&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;family&amp;#39;&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;normal&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;
+            &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;weight&amp;#39;&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;bold&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;
+            &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;size&amp;#39;&lt;/span&gt;   &lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;40&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;})&lt;/span&gt;
+    &lt;span style=&#34;color: #f8f8f2&#34;&gt;plt&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;show()&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;
+&lt;figure class=&#34;align-center&#34;&gt;
+    
+        &lt;img src=&#34;http://fartashh.github.io/images/post/how-calculate-mrr/output_10_0.png&#34;  /&gt;
+    
+    
+&lt;/figure&gt;
+&lt;/p&gt;
+
+&lt;h4 id=&#34;rolling-mrr:ba0954b7732428216be787aa07f18b1d&#34;&gt;Rolling MRR&lt;/h4&gt;
+
+&lt;p&gt;As mentioned earlier, rolling MRR for each day is sum of daily MRR of past 30 days.&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;    &lt;span style=&#34;color: #f8f8f2&#34;&gt;rolling_mrr&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;[{&lt;/span&gt;
+                &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;date&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;x[&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;date&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;],&lt;/span&gt; 
+                &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;mrc&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;x[&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;mrc&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;sum([z[&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;mrc&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color: #66d9ef&#34;&gt;for&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;z&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;daily_mrr&lt;/span&gt;
+                                       &lt;span style=&#34;color: #f8f8f2&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;0&lt;/span&gt; &lt;span style=&#34;color: #66d9ef&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;daily_mrr&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;index(x)&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;30&lt;/span&gt; 
+                                        &lt;span style=&#34;color: #66d9ef&#34;&gt;else&lt;/span&gt; 
+                                        &lt;span style=&#34;color: #f8f8f2&#34;&gt;daily_mrr&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;index(x)&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;-&lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;30&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:daily_mrr&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;index(x)]])}&lt;/span&gt; &lt;span style=&#34;color: #66d9ef&#34;&gt;for&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;x&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;daily_mrr]&lt;/span&gt;
+    
+    &lt;span style=&#34;color: #75715e&#34;&gt;# visualization&lt;/span&gt;
+    &lt;span style=&#34;color: #f8f8f2&#34;&gt;dates&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;matplotlib&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;dates&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;date2num([x[&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;date&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color: #66d9ef&#34;&gt;for&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;x&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;rolling_mrr])&lt;/span&gt;
+    &lt;span style=&#34;color: #f8f8f2&#34;&gt;y&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;[x[&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;mrc&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color: #66d9ef&#34;&gt;for&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;x&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;rolling_mrr]&lt;/span&gt;
+    &lt;span style=&#34;color: #f8f8f2&#34;&gt;plt&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;figure(figsize&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;100&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;20&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;))&lt;/span&gt;
+    &lt;span style=&#34;color: #f8f8f2&#34;&gt;plt&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;plot_date(dates,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;y,&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;-&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;)&lt;/span&gt;
+    &lt;span style=&#34;color: #f8f8f2&#34;&gt;plt&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;rc(&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;font&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;**&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;{&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;family&amp;#39;&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;normal&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;
+            &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;weight&amp;#39;&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;bold&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;
+            &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;size&amp;#39;&lt;/span&gt;   &lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;40&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;})&lt;/span&gt;
+    &lt;span style=&#34;color: #f8f8f2&#34;&gt;plt&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;show()&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;
+&lt;figure class=&#34;align-center&#34;&gt;
+    
+        &lt;img src=&#34;http://fartashh.github.io/images/post/how-calculate-mrr/output_12_0.png&#34;  /&gt;
+    
+    
+&lt;/figure&gt;
+&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Create a Natural Language Question Answering system with IBM Watson</title>
