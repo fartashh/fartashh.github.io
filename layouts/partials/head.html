@@ -13,6 +13,8 @@
 		<meta property="og:type"  content="article" />
 		<meta property="og:url"  content="{{ with .Permalink }}{{ . }}{{ end }}" />
     	<meta name="description" content="{{ with .Params.desc }}{{ . }}{{ end }}">
+    	<meta name="og:description" content="{{ with .Params.desc }}{{ . }}{{ end }}">
+    	<meta name="og:description" content="{{ with .Params.desc }}{{ . }}{{ end }}">
 		<meta property="og:image" content="{{ with .Params.image}}{{ . }}{{ end }}" />
     	<meta http-equiv="content-language" content="{{ with .Site.LanguageCode }}{{ . }}{{ end }}" />
     	{{ .Hugo.Generator }}

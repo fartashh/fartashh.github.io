@@ -5,7 +5,7 @@ draft = false
 tags = ["MRR", "Pandas"]
 title = "How to Calculate Monthly Recurring Revenue (MRR)"
 image = "http://fartashh.github.io/images/post/how-calculate-mrr/mrr.jpg"
-desc = "MRR calculation by using pandas"
+desc = "Monthly Recurring Revenue is one of the most important metrics you need for measuring health of your subscription business. In this post I explain how to calculate monthly recurring revenue using pandas"
 +++
 
 {{< img src="/images/post/how-calculate-mrr/mrr.jpg" title="" class="align-center">}}
