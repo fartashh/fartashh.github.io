@@ -4,7 +4,7 @@ date = "2016-05-24T16:21:57+08:00"
 draft = false
 tags = ["AWS", "Lambda"]
 title = "Serverless Approach to Transcode Media"
-image = "http://fartashh.github.io/images/lambda-transcoder/s3-lambda-transcoder.png"
+image = "http://fartashh.github.io/images/post/lambda-transcoder/s3-lambda-transcoder.png"
 desc = "Handling and managing media content is quite challenging. You need to decode the media to different formats and qualities, to serve users with different device and bandwidth. In this post I'm going to explain how to setup the fully automated serverless approach by using AWS S3, Lambda, and Elastic Transcoder "
 
 +++
