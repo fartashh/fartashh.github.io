@@ -29,7 +29,7 @@ Transcoder job (convert mp3 to hls) and save the output in `output` bucket.
 
 ## Setup Elastic Transcoder
 Amazon Elastic Transcoder is media transcoding in cloud. It helps us to convert media files, which have been stored in S3, into 
-media files into the formats required by consumer playback devices. In our case, we want to convert mp3 to the format supported 
+the formats required by consumer playback devices. In our case, we want to convert mp3 to the format supported 
 by HLS protocol.
 
 In order to get it up and running, you need to be familiar with three components of ET:
