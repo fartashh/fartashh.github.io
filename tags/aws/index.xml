@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Aws on Fartash</title>
+    <link>http://fartashh.github.io/tags/aws/</link>
+    <description>Recent content in Aws on Fartash</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 24 May 2016 16:21:57 +0800</lastBuildDate>
+    <atom:link href="http://fartashh.github.io/tags/aws/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Serverless Approach to Transcode Media</title>
+      <link>http://fartashh.github.io/post/serverless-approach-to-transcode-media/</link>
+      <pubDate>Tue, 24 May 2016 16:21:57 +0800</pubDate>
+      
+      <guid>http://fartashh.github.io/post/serverless-approach-to-transcode-media/</guid>
+      <description>
+
+&lt;p&gt;
+&lt;figure class=&#34;align-center&#34;&gt;
+    
+        &lt;img src=&#34;http://fartashh.github.io/images/post/lambda-transcoder/s3-lambda-transcoder.png&#34;  /&gt;
+    
+    
+&lt;/figure&gt;
+
+Handling and managing media content is quite challenging. You need to decode the media to different formats and qualities,
+to serve users with different devices and bandwidth.
+And I am pretty sure you don&amp;rsquo;t want to handle this complexity in your app :).
+In this post I am going to explain how to setup the fully automated serverless approach by using AWS S3, Lambda, and Elastic Transcoder.&lt;/p&gt;
+
+&lt;h2 id=&#34;case-study:969e4744411803acac2ecc623876bfcd&#34;&gt;Case Study&lt;/h2&gt;
+
+&lt;p&gt;I always understand and learn any new concept better by using case studies; so I have decided to have one.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Build feature to support streaming for IOS devices&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;As you may know Apple use HTTP Live Streaming (HLS) which is an adaptive streaming communications protocol created by
+Apple to communicate with iOS and Apple TV devices and Macs running OSX in Snow Leopard or later.&lt;/p&gt;
+
+&lt;p&gt;The final system, automatically detects the *.mp3 file uploaded to &lt;code&gt;input&lt;/code&gt; bucket, call lambda function, to create a new
+Transcoder job (convert mp3 to hls) and save the output in &lt;code&gt;output&lt;/code&gt; bucket.&lt;/p&gt;
+
+&lt;h2 id=&#34;setup-elastic-transcoder:969e4744411803acac2ecc623876bfcd&#34;&gt;Setup Elastic Transcoder&lt;/h2&gt;
+
+&lt;p&gt;Amazon Elastic Transcoder is media transcoding in cloud. It helps us to convert media files, which have been stored in S3, into
+the formats required by consumer playback devices. In our case, we want to convert mp3 to the format supported
+by HLS protocol.&lt;/p&gt;
+
+&lt;p&gt;In order to get it up and running, you need to be familiar with three components of ET:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Pipelines&lt;/strong&gt; are queues that manage your transcoding jobs. When you create a job, you specify which pipeline you
+want to add the job to. Elastic Transcoder starts processing the jobs in a pipeline in the order in which you added them.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Presets&lt;/strong&gt; are templates that contain most of the settings for transcoding media files from one format to another.
+Elastic Transcoder includes some default presets for common formats, for example, several iPod and iPhone versions.
+You can also create your own presets for formats that aren&amp;rsquo;t included among the default presets. You specify which
+preset you want to use when you create a job.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Jobs&lt;/strong&gt; do the work of transcoding. Each job converts one file into up to 30 formats. For example, if you want to
+convert a media file into six different formats, you can create files in all six formats by creating a single job.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&#34;setup-pipeline:969e4744411803acac2ecc623876bfcd&#34;&gt;Setup Pipeline&lt;/h4&gt;
+
+&lt;p&gt;In order to run transcoder job, first we need to create new pipeline.
+
+&lt;figure class=&#34;align-center&#34;&gt;
+    
+        &lt;img src=&#34;http://fartashh.github.io/images/post/lambda-transcoder/pipeline.png&#34;  /&gt;
+    
+    
+&lt;/figure&gt;
+
+To create a pipeline, you need to specify the input, output, and thumbnails buckets. Also you can set some additional options;
+such as storage class and permission for each bucket.
+I add &lt;code&gt;Open/Download&lt;/code&gt; permission for All users, to &lt;code&gt;output&lt;/code&gt; bucket. you can manage bucket accessibility based on your strategy.&lt;/p&gt;
+
+&lt;p&gt;After creating pipeline, you can create a new job to convert your media, However, we want to do it automatically ;).&lt;/p&gt;
+
+&lt;h4 id=&#34;understanding-presets:969e4744411803acac2ecc623876bfcd&#34;&gt;Understanding Presets&lt;/h4&gt;
+
+&lt;p&gt;As explained before &lt;strong&gt;Presets&lt;/strong&gt; are pre configured template you can use for transcoding media files from one format to another.
+For instance to prepare your media for HLS protocol there are 13 different presets available and we are going to use one.
+I have decided to use &lt;code&gt;System preset: HLS Audio - 160k&lt;/code&gt; but you can choose any other or create your own preset.&lt;/p&gt;
+
+&lt;h2 id=&#34;create-your-lambda-function:969e4744411803acac2ecc623876bfcd&#34;&gt;Create Your Lambda function&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s create our lambda function. Select &lt;code&gt;S3-get-object&lt;/code&gt; blueprint.
+Configure event source by selecting &lt;code&gt;S3&lt;/code&gt; as event source type, &lt;code&gt;input&lt;/code&gt; as Bucket, and for event type select
+&lt;code&gt;Object Created &amp;gt; Put&lt;/code&gt;.
+
+&lt;figure class=&#34;align-center&#34;&gt;
+    
+        &lt;img src=&#34;http://fartashh.github.io/images/post/lambda-transcoder/lambda-event.png&#34;  /&gt;
+    
+    
+&lt;/figure&gt;
+
+click next and replace the code with following codes:&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;   
+   &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;use strict&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;;&lt;/span&gt;
+   &lt;span style=&#34;color: #a6e22e&#34;&gt;console&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;log&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;Loading function&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;);&lt;/span&gt;
+   
+   &lt;span style=&#34;color: #66d9ef&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;aws&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;require&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;aws-sdk&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;);&lt;/span&gt;
+   &lt;span style=&#34;color: #66d9ef&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;s3&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #66d9ef&#34;&gt;new&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;aws&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;S3&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;({&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;apiVersion&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;2006-03-01&amp;#39;&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;});&lt;/span&gt;
+   &lt;span style=&#34;color: #66d9ef&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;elastictranscoder&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #66d9ef&#34;&gt;new&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;aws&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;ElasticTranscoder&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;();&lt;/span&gt;
+   
+   &lt;span style=&#34;color: #66d9ef&#34;&gt;function&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;getFileName&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;path&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;{&lt;/span&gt;
+      &lt;span style=&#34;color: #66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;path&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;split&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;/&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;).&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;reverse&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;()[&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;].&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;split&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;.&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;)[&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;];&lt;/span&gt;
+   &lt;span style=&#34;color: #f8f8f2&#34;&gt;}&lt;/span&gt;
+   
+   &lt;span style=&#34;color: #a6e22e&#34;&gt;exports&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;handler&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;event&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;context&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;callback&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;{&lt;/span&gt;
+   
+       &lt;span style=&#34;color: #66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;bucket&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;event&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;Records&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;].&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;s3&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;bucket&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;;&lt;/span&gt;
+       &lt;span style=&#34;color: #66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;key&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;decodeURIComponent(&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;event&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;Records&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;].&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;s3&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;object&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;key&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;replace&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;/\+/g&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39; &amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;));&lt;/span&gt;
+
+       &lt;span style=&#34;color: #66d9ef&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;params&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;{&lt;/span&gt;
+         &lt;span style=&#34;color: #a6e22e&#34;&gt;Input&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;{&lt;/span&gt; 
+           &lt;span style=&#34;color: #a6e22e&#34;&gt;Key&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;key&lt;/span&gt;
+         &lt;span style=&#34;color: #f8f8f2&#34;&gt;},&lt;/span&gt;
+         &lt;span style=&#34;color: #a6e22e&#34;&gt;PipelineId&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;[USE YOUR PIPELINE ID]&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt; 
+         &lt;span style=&#34;color: #a6e22e&#34;&gt;OutputKeyPrefix&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;[OUT PUT KEY PREFIX ex. `iphone/`]&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;
+         &lt;span style=&#34;color: #a6e22e&#34;&gt;Outputs&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;[&lt;/span&gt;
+           &lt;span style=&#34;color: #f8f8f2&#34;&gt;{&lt;/span&gt;
+             &lt;span style=&#34;color: #a6e22e&#34;&gt;SegmentDuration&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;10.0&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;    
+             &lt;span style=&#34;color: #a6e22e&#34;&gt;Key&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;getFileName&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;key&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;),&lt;/span&gt;
+             &lt;span style=&#34;color: #a6e22e&#34;&gt;PresetId&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;[PRESETID ex `1351620000001-200060`]&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #75715e&#34;&gt;// hls&lt;/span&gt;
+           &lt;span style=&#34;color: #f8f8f2&#34;&gt;}&lt;/span&gt;
+         &lt;span style=&#34;color: #f8f8f2&#34;&gt;]&lt;/span&gt;
+       &lt;span style=&#34;color: #f8f8f2&#34;&gt;};&lt;/span&gt;
+   
+       &lt;span style=&#34;color: #a6e22e&#34;&gt;elastictranscoder&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;createJob&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;params&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #66d9ef&#34;&gt;function&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;err&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;data&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;{&lt;/span&gt;
+         &lt;span style=&#34;color: #66d9ef&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;err&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;){&lt;/span&gt;
+           &lt;span style=&#34;color: #a6e22e&#34;&gt;console&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;log&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;err&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #a6e22e&#34;&gt;err&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;stack&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;);&lt;/span&gt; &lt;span style=&#34;color: #75715e&#34;&gt;// an error occurred&lt;/span&gt;
+           &lt;span style=&#34;color: #a6e22e&#34;&gt;context&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;fail&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;();&lt;/span&gt;
+           &lt;span style=&#34;color: #66d9ef&#34;&gt;return&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;;&lt;/span&gt;
+         &lt;span style=&#34;color: #f8f8f2&#34;&gt;}&lt;/span&gt;
+         &lt;span style=&#34;color: #a6e22e&#34;&gt;context&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;succeed&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;();&lt;/span&gt;
+       &lt;span style=&#34;color: #f8f8f2&#34;&gt;});&lt;/span&gt;
+   &lt;span style=&#34;color: #f8f8f2&#34;&gt;};&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Under the section &lt;code&gt;Lambda function handler and role&lt;/code&gt; create new role based on &amp;lsquo;s3 execution role&amp;rsquo; to let lambda write
+into s3 bucket.&lt;/p&gt;
+
+&lt;p&gt;You are almost done. Update the &lt;em&gt;PipelineId&lt;/em&gt;, &lt;em&gt;OutputKeyPrefix&lt;/em&gt;, and &lt;em&gt;PresetId&lt;/em&gt; with your data and click next.
+In the Review section, you just need to Enable the event source and click on the create function button.&lt;/p&gt;
+
+&lt;p&gt;Congratulations!! Now you have a serverless media transcoder system. Whenever you upload a file to your input bucket, it raises an
+event which is handled by Lambda function. Lambda handler adds a new job by using the given presets in the pipeline and whenever it is finished,
+the new format of data is available at the output bucket.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

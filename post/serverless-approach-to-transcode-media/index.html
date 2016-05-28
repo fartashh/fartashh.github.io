@@ -1,0 +1,268 @@
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<title>Serverless Approach to Transcode Media &middot; Fartash</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta property="author" name="author" content="Fartash Haghani">
+		<meta property="og:type"  content="article" />
+		<meta property="og:url"  content="http://fartashh.github.io/post/serverless-approach-to-transcode-media/" />
+    	<meta name="description" content="Handling and managing media content is quite challenging. You need to decode the media to different formats and qualities, to serve users with different device and bandwidth. In this post I&#39;m going to explain how to setup the fully automated serverless approach by using AWS S3, Lambda, and Elastic Transcoder ">
+    	<meta name="og:description" content="Handling and managing media content is quite challenging. You need to decode the media to different formats and qualities, to serve users with different device and bandwidth. In this post I&#39;m going to explain how to setup the fully automated serverless approach by using AWS S3, Lambda, and Elastic Transcoder ">
+    	<meta name="og:description" content="Handling and managing media content is quite challenging. You need to decode the media to different formats and qualities, to serve users with different device and bandwidth. In this post I&#39;m going to explain how to setup the fully automated serverless approach by using AWS S3, Lambda, and Elastic Transcoder ">
+		<meta property="og:image" content="http://fartashh.github.io/images/lambda-transcoder/s3-lambda-transcoder.png" />
+    	<meta http-equiv="content-language" content="en-us" />
+    	<meta name="generator" content="Hugo 0.15" />
+		
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" type="text/css">
+		<link rel="stylesheet" href="http://fartashh.github.io/css/main.css" />
+		
+	</head>
+
+	<body id="top">
+        
+<noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-PQKJZV"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-PQKJZV');</script>
+
+        
+<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-54ec37c8275f096f"></script>
+
+		<!-- Header -->
+<header id="header">
+	<div class='my-image'>
+   <a href="#" class="image avatar"><img src="http://fartashh.github.io/images/avatar.jpg" alt="" /></a>
+  </div>
+  <div class='my-name'>Fartash Haghani</div>
+  <div class='my-position'>Software Engineer | Data Scientist</div>
+    <p class='bio'>I &lt;3 data and Ghorme Sabzi :)</p>
+	<p class='bio'>I am a software engineer with huge interest in data science and machine learning. I&rsquo;m working as Data Scientist and Developer at Mindvalley, where I get the chance to build scalable app with python and node.js to convert data into products. Beside that, I mentor students in programming and data science.</p>
+</header>
+
+
+		<!-- Main -->
+		<div id="main">
+            <h3><a href="/post/serverless-approach-to-transcode-media/">Serverless Approach to Transcode Media </a> <span class="post-date">Tue, May 24, 2016</span>
+            </h3>
+
+            <p> 
+
+<p>
+<figure class="align-center">
+    
+        <img src="/images/post/lambda-transcoder/s3-lambda-transcoder.png"  />
+    
+    
+</figure>
+
+Handling and managing media content is quite challenging. You need to decode the media to different formats and qualities,
+to serve users with different devices and bandwidth.
+And I am pretty sure you don&rsquo;t want to handle this complexity in your app :).
+In this post I am going to explain how to setup the fully automated serverless approach by using AWS S3, Lambda, and Elastic Transcoder.</p>
+
+<h2 id="case-study:969e4744411803acac2ecc623876bfcd">Case Study</h2>
+
+<p>I always understand and learn any new concept better by using case studies; so I have decided to have one.</p>
+
+<blockquote>
+<p>Build feature to support streaming for IOS devices</p>
+</blockquote>
+
+<p>As you may know Apple use HTTP Live Streaming (HLS) which is an adaptive streaming communications protocol created by
+Apple to communicate with iOS and Apple TV devices and Macs running OSX in Snow Leopard or later.</p>
+
+<p>The final system, automatically detects the *.mp3 file uploaded to <code>input</code> bucket, call lambda function, to create a new
+Transcoder job (convert mp3 to hls) and save the output in <code>output</code> bucket.</p>
+
+<h2 id="setup-elastic-transcoder:969e4744411803acac2ecc623876bfcd">Setup Elastic Transcoder</h2>
+
+<p>Amazon Elastic Transcoder is media transcoding in cloud. It helps us to convert media files, which have been stored in S3, into
+the formats required by consumer playback devices. In our case, we want to convert mp3 to the format supported
+by HLS protocol.</p>
+
+<p>In order to get it up and running, you need to be familiar with three components of ET:</p>
+
+<ul>
+<li><strong>Pipelines</strong> are queues that manage your transcoding jobs. When you create a job, you specify which pipeline you
+want to add the job to. Elastic Transcoder starts processing the jobs in a pipeline in the order in which you added them.</li>
+<li><strong>Presets</strong> are templates that contain most of the settings for transcoding media files from one format to another.
+Elastic Transcoder includes some default presets for common formats, for example, several iPod and iPhone versions.
+You can also create your own presets for formats that aren&rsquo;t included among the default presets. You specify which
+preset you want to use when you create a job.</li>
+<li><strong>Jobs</strong> do the work of transcoding. Each job converts one file into up to 30 formats. For example, if you want to
+convert a media file into six different formats, you can create files in all six formats by creating a single job.</li>
+</ul>
+
+<h4 id="setup-pipeline:969e4744411803acac2ecc623876bfcd">Setup Pipeline</h4>
+
+<p>In order to run transcoder job, first we need to create new pipeline.
+
+<figure class="align-center">
+    
+        <img src="/images/post/lambda-transcoder/pipeline.png"  />
+    
+    
+</figure>
+
+To create a pipeline, you need to specify the input, output, and thumbnails buckets. Also you can set some additional options;
+such as storage class and permission for each bucket.
+I add <code>Open/Download</code> permission for All users, to <code>output</code> bucket. you can manage bucket accessibility based on your strategy.</p>
+
+<p>After creating pipeline, you can create a new job to convert your media, However, we want to do it automatically ;).</p>
+
+<h4 id="understanding-presets:969e4744411803acac2ecc623876bfcd">Understanding Presets</h4>
+
+<p>As explained before <strong>Presets</strong> are pre configured template you can use for transcoding media files from one format to another.
+For instance to prepare your media for HLS protocol there are 13 different presets available and we are going to use one.
+I have decided to use <code>System preset: HLS Audio - 160k</code> but you can choose any other or create your own preset.</p>
+
+<h2 id="create-your-lambda-function:969e4744411803acac2ecc623876bfcd">Create Your Lambda function</h2>
+
+<p>Let&rsquo;s create our lambda function. Select <code>S3-get-object</code> blueprint.
+Configure event source by selecting <code>S3</code> as event source type, <code>input</code> as Bucket, and for event type select
+<code>Object Created &gt; Put</code>.
+
+<figure class="align-center">
+    
+        <img src="/images/post/lambda-transcoder/lambda-event.png"  />
+    
+    
+</figure>
+
+click next and replace the code with following codes:</p>
+
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">   
+   <span style="color: #e6db74">&#39;use strict&#39;</span><span style="color: #f8f8f2">;</span>
+   <span style="color: #a6e22e">console</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">log</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&#39;Loading function&#39;</span><span style="color: #f8f8f2">);</span>
+   
+   <span style="color: #66d9ef">let</span> <span style="color: #a6e22e">aws</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">require</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&#39;aws-sdk&#39;</span><span style="color: #f8f8f2">);</span>
+   <span style="color: #66d9ef">let</span> <span style="color: #a6e22e">s3</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">new</span> <span style="color: #a6e22e">aws</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">S3</span><span style="color: #f8f8f2">({</span> <span style="color: #a6e22e">apiVersion</span><span style="color: #f92672">:</span> <span style="color: #e6db74">&#39;2006-03-01&#39;</span> <span style="color: #f8f8f2">});</span>
+   <span style="color: #66d9ef">let</span> <span style="color: #a6e22e">elastictranscoder</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">new</span> <span style="color: #a6e22e">aws</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">ElasticTranscoder</span><span style="color: #f8f8f2">();</span>
+   
+   <span style="color: #66d9ef">function</span> <span style="color: #a6e22e">getFileName</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">path</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+      <span style="color: #66d9ef">return</span> <span style="color: #a6e22e">path</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">split</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&#39;/&#39;</span><span style="color: #f8f8f2">).</span><span style="color: #a6e22e">reverse</span><span style="color: #f8f8f2">()[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">].</span><span style="color: #a6e22e">split</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">&#39;.&#39;</span><span style="color: #f8f8f2">)[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">];</span>
+   <span style="color: #f8f8f2">}</span>
+   
+   <span style="color: #a6e22e">exports</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">handler</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">event</span><span style="color: #f8f8f2">,</span> <span style="color: #a6e22e">context</span><span style="color: #f8f8f2">,</span> <span style="color: #a6e22e">callback</span><span style="color: #f8f8f2">)</span> <span style="color: #f92672">=&gt;</span> <span style="color: #f8f8f2">{</span>
+   
+       <span style="color: #66d9ef">const</span> <span style="color: #a6e22e">bucket</span> <span style="color: #f92672">=</span> <span style="color: #a6e22e">event</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">Records</span><span style="color: #f8f8f2">[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">].</span><span style="color: #a6e22e">s3</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">bucket</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">name</span><span style="color: #f8f8f2">;</span>
+       <span style="color: #66d9ef">const</span> <span style="color: #a6e22e">key</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">decodeURIComponent(</span><span style="color: #a6e22e">event</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">Records</span><span style="color: #f8f8f2">[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">].</span><span style="color: #a6e22e">s3</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">object</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">key</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">replace</span><span style="color: #f8f8f2">(</span><span style="color: #e6db74">/\+/g</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">&#39; &#39;</span><span style="color: #f8f8f2">));</span>
+
+       <span style="color: #66d9ef">var</span> <span style="color: #a6e22e">params</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">{</span>
+         <span style="color: #a6e22e">Input</span><span style="color: #f92672">:</span> <span style="color: #f8f8f2">{</span> 
+           <span style="color: #a6e22e">Key</span><span style="color: #f92672">:</span> <span style="color: #a6e22e">key</span>
+         <span style="color: #f8f8f2">},</span>
+         <span style="color: #a6e22e">PipelineId</span><span style="color: #f92672">:</span> <span style="color: #e6db74">&#39;[USE YOUR PIPELINE ID]&#39;</span><span style="color: #f8f8f2">,</span> 
+         <span style="color: #a6e22e">OutputKeyPrefix</span><span style="color: #f92672">:</span> <span style="color: #e6db74">&#39;[OUT PUT KEY PREFIX ex. `iphone/`]&#39;</span><span style="color: #f8f8f2">,</span>
+         <span style="color: #a6e22e">Outputs</span><span style="color: #f92672">:</span> <span style="color: #f8f8f2">[</span>
+           <span style="color: #f8f8f2">{</span>
+             <span style="color: #a6e22e">SegmentDuration</span><span style="color: #f92672">:</span><span style="color: #e6db74">&#39;10.0&#39;</span><span style="color: #f8f8f2">,</span>    
+             <span style="color: #a6e22e">Key</span><span style="color: #f92672">:</span> <span style="color: #a6e22e">getFileName</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">key</span><span style="color: #f8f8f2">),</span>
+             <span style="color: #a6e22e">PresetId</span><span style="color: #f92672">:</span> <span style="color: #e6db74">&#39;[PRESETID ex `1351620000001-200060`]&#39;</span><span style="color: #f8f8f2">,</span> <span style="color: #75715e">// hls</span>
+           <span style="color: #f8f8f2">}</span>
+         <span style="color: #f8f8f2">]</span>
+       <span style="color: #f8f8f2">};</span>
+   
+       <span style="color: #a6e22e">elastictranscoder</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">createJob</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">params</span><span style="color: #f8f8f2">,</span> <span style="color: #66d9ef">function</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">err</span><span style="color: #f8f8f2">,</span> <span style="color: #a6e22e">data</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+         <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(</span><span style="color: #a6e22e">err</span><span style="color: #f8f8f2">){</span>
+           <span style="color: #a6e22e">console</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">log</span><span style="color: #f8f8f2">(</span><span style="color: #a6e22e">err</span><span style="color: #f8f8f2">,</span> <span style="color: #a6e22e">err</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">stack</span><span style="color: #f8f8f2">);</span> <span style="color: #75715e">// an error occurred</span>
+           <span style="color: #a6e22e">context</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">fail</span><span style="color: #f8f8f2">();</span>
+           <span style="color: #66d9ef">return</span><span style="color: #f8f8f2">;</span>
+         <span style="color: #f8f8f2">}</span>
+         <span style="color: #a6e22e">context</span><span style="color: #f8f8f2">.</span><span style="color: #a6e22e">succeed</span><span style="color: #f8f8f2">();</span>
+       <span style="color: #f8f8f2">});</span>
+   <span style="color: #f8f8f2">};</span>
+</pre></div>
+
+
+<p>Under the section <code>Lambda function handler and role</code> create new role based on &lsquo;s3 execution role&rsquo; to let lambda write
+into s3 bucket.</p>
+
+<p>You are almost done. Update the <em>PipelineId</em>, <em>OutputKeyPrefix</em>, and <em>PresetId</em> with your data and click next.
+In the Review section, you just need to Enable the event source and click on the create function button.</p>
+
+<p>Congratulations!! Now you have a serverless media transcoder system. Whenever you upload a file to your input bucket, it raises an
+event which is handled by Lambda function. Lambda handler adds a new job by using the given presets in the pipeline and whenever it is finished,
+the new format of data is available at the output bucket.</p>
+ </p>
+
+            <ul id="tags">
+                
+                <li class="tag"><a href="/tags/aws">AWS</a></li>
+                
+                <li class="tag"><a href="/tags/lambda">Lambda</a></li>
+                
+            </ul>
+
+            
+<div class="addthis_sharing_toolbox"></div>
+			<a href="/"> <i class="fa fa-home"></i> </a>
+
+            <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_config = function () {
+        this.page.url = 'http:\/\/fartashh.github.io\/post\/serverless-approach-to-transcode-media\/'; 
+        this.page.identifier = 'Serverless Approach to Transcode Media'; 
+    };
+    (function () {
+        
+        
+        if (window.location.hostname == "localhost")
+            return;
+
+        var dsq = document.createElement('script');
+        dsq.type = 'text/javascript';
+        dsq.async = true;
+        var disqus_shortname = 'fartashh';
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+</noscript>
+
+
+
+
+		</div>
+
+
+		<!-- Footer -->
+<footer id="footer">
+	<ul class="icons">
+		
+		
+		<li><a href="//twitter.com/fartashh" target="_blank" class="icon fa-twitter"><span class="label">Twitter</span></a></li>
+		
+		
+		<li><a href="//github.com/fartashh" target="_blank" class="icon fa-github"><span class="label">Github</span></a></li>
+		
+		
+		<li><a href="//my.linkedin.com/in/fartashh" target="_blank" class="icon fa-linkedin"><span class="label">Linkedin</span></a></li>
+		
+		
+		
+	</ul>
+
+	<ul class="copyright">
+		
+	</ul>
+</footer>
+
+<!-- Scripts -->
+<script src="http://fartashh.github.io/js/jquery.min.js"></script>
+<script src="http://fartashh.github.io/js/jquery.poptrox.min.js"></script>
+<script src="http://fartashh.github.io/js/skel.min.js"></script>
+<script src="http://fartashh.github.io/js/util.js"></script>
+
+<script src="http://fartashh.github.io/js/main.js"></script>
+
+
+
+	</body>
+</html>
