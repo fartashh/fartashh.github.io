@@ -5,7 +5,7 @@ draft = false
 tags = ["AWS", "Lambda"]
 title = "Architecting Serverless Push Notification System in AWS"
 image = "http://fartashh.github.io/images/post/lambda-sns/aws_sns_lambda.png"
-desc = "Server less push notification system by using AWS Lambda and SNS. It is scalable, flexible and integrable with any user management system. it is designed to send user based push notification"
+desc = "Server less push notification system by using AWS Lambda and SNS. It is scalable, flexible and integrable with any user management system. It is designed to send user based push notification."
 
 +++
 
