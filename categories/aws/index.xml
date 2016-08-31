@@ -6,8 +6,178 @@
     <description>Recent content in Aws on Fartash</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 24 May 2016 16:21:57 +0800</lastBuildDate>
+    <lastBuildDate>Wed, 31 Aug 2016 10:11:33 +0800</lastBuildDate>
     <atom:link href="http://fartashh.github.io/categories/aws/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Architecting Serverless Push Notification System in AWS</title>
+      <link>http://fartashh.github.io/post/architecting-serverless-push-notification/</link>
+      <pubDate>Wed, 31 Aug 2016 10:11:33 +0800</pubDate>
+      
+      <guid>http://fartashh.github.io/post/architecting-serverless-push-notification/</guid>
+      <description>
+
+&lt;p&gt;
+&lt;figure class=&#34;align-center&#34;&gt;
+    
+        &lt;img src=&#34;http://fartashh.github.io/images/post/lambda_sns/aws_sns_lambda.png&#34;  /&gt;
+    
+    
+&lt;/figure&gt;
+
+One of the best approaches to increase and keep customer engagement with your app is push notification and as you may know
+there are many services such SNS, Firebase, Pushwoosh, Urban Airship, carnival and etc., to address this need.&lt;/p&gt;
+
+&lt;p&gt;Recently at Mindvalley we have decided to use one of the available solutions to send push notifications to our web and mobile users.
+The new service should support following requirements;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Integrable with our user management system&lt;/li&gt;
+&lt;li&gt;Authentication and Authorization with Auth0&lt;/li&gt;
+&lt;li&gt;Send notification to &lt;strong&gt;user&lt;/strong&gt; (multiple devices, multiple platform) not only single device&lt;/li&gt;
+&lt;li&gt;Schedule notification&lt;/li&gt;
+&lt;li&gt;Flexible user segmentation&lt;/li&gt;
+&lt;li&gt;Comprehensive API to manage notification system&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;proposed-solution:0fdc538f711f0b73c4e8cac8919e8b3b&#34;&gt;Proposed Solution&lt;/h2&gt;
+
+&lt;p&gt;After doing some research and comparing aforementioned solutions I came up with the idea of using server less approach.
+The proposed system used AWS SNS, RDS, Lambda, and API Gateway to fulfill all requirements.&lt;/p&gt;
+
+
+&lt;figure class=&#34;align-center&#34;&gt;
+    
+        &lt;img src=&#34;http://fartashh.github.io/images/post/lambda_sns/sns_architecture.png&#34;  /&gt;
+    
+    
+&lt;/figure&gt;
+
+
+&lt;p&gt;you can find all lambdas of the system &lt;a href=&#34;https://github.com/fartashh/userbase-sns-lambda&#34;&gt;here&lt;/a&gt;
+lets look at each step of implementing the solution;&lt;/p&gt;
+
+&lt;h3 id=&#34;step-1-design-database:0fdc538f711f0b73c4e8cac8919e8b3b&#34;&gt;Step 1: Design Database&lt;/h3&gt;
+
+&lt;p&gt;I have decided to use RDS (postgresql) to store the system data. System&amp;rsquo;s DB contains 4 tables;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;users_endpoints&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;internal_user_id&lt;/em&gt; : connects the system with user management system.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;arn&lt;/em&gt; : Amazon Resource Name you get this value after registering the device in SNS.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;token&lt;/em&gt; : user device token.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;app_name&lt;/em&gt; : application name.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;user_data&lt;/em&gt; : it is a dictionary, you can store any data for user and query them later based on given attributes.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;timezone&lt;/em&gt; : to send notification in user timezone.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;topics&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;stores topics which user may want to subscribe to them.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;subscriptions&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;stores user&amp;rsquo;s subscription information&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;notification&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;stores scheduled notifications&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;figure class=&#34;align-center&#34;&gt;
+    
+        &lt;img src=&#34;http://fartashh.github.io/images/post/lambda_sns/aws_sns_lambda_erd.png&#34;  /&gt;
+    
+    
+&lt;/figure&gt;
+
+
+&lt;h3 id=&#34;step-2-implement-lambdas:0fdc538f711f0b73c4e8cac8919e8b3b&#34;&gt;Step 2: Implement Lambdas&lt;/h3&gt;
+
+&lt;p&gt;Before you start uploading and deploying lambdas I suggest to
+read &lt;a href=&#34;https://getpocket.com/a/read/1215426880&#34;&gt;&lt;em&gt;Configure your Lambda functions like a champ and let your code sail smoothly to Production&lt;/em&gt;&lt;/a&gt;
+post. It explains how setup your lambdas properly in &lt;em&gt;test&lt;/em&gt;, &lt;em&gt;stg&lt;/em&gt;, and &lt;em&gt;production&lt;/em&gt; environments.&lt;/p&gt;
+
+&lt;h4 id=&#34;step-2-1-lambdas-configuration:0fdc538f711f0b73c4e8cac8919e8b3b&#34;&gt;Step 2.1: Lambdas Configuration&lt;/h4&gt;
+
+&lt;p&gt;We can store our configuration in AWS S3 ,dynamo db or in deployment package. configuration contains information
+about list of applications setup on SNS and RDS configuration for each environment.&lt;/p&gt;
+
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;{&lt;/span&gt;
+  &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;$LATEST&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;{&lt;/span&gt;
+    &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;APPLICATIONS&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;{&lt;/span&gt;
+      &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;appname-ios-dev&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;arn:aws:sns:us-east-1:xxxxxxxxxx:app/APNS_SANDBOX/ios-dev&amp;quot;&lt;/span&gt;
+    &lt;span style=&#34;color: #f8f8f2&#34;&gt;},&lt;/span&gt;
+    &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;DATABASE&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;{&lt;/span&gt;
+      &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;host&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;dev-sns-lambda.xxxxxxxxxx.us-east-1.rds.amazonaws.com&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;
+      &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;port&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;5432&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;
+      &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;db&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;xxxxxxxxxx&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;
+      &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;tables&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;{&lt;/span&gt;
+        &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;users_endpoints&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;users_endpoints&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;
+        &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;topics&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;topics&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;
+        &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;subscriptions&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;subscriptions&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;
+        &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;notifications&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;notifications&amp;quot;&lt;/span&gt;
+      &lt;span style=&#34;color: #f8f8f2&#34;&gt;},&lt;/span&gt;
+      &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;user&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;xxxxxxxxxx&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;,&lt;/span&gt;
+      &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;password&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;xxxxxxxxxxxxxxxxxx&amp;quot;&lt;/span&gt;
+    &lt;span style=&#34;color: #f8f8f2&#34;&gt;}&lt;/span&gt;
+  &lt;span style=&#34;color: #f8f8f2&#34;&gt;},&lt;/span&gt;
+  &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;DEV&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;{&lt;/span&gt;
+  &lt;span style=&#34;color: #f8f8f2&#34;&gt;},&lt;/span&gt;
+  &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;TEST&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;{&lt;/span&gt;
+  &lt;span style=&#34;color: #f8f8f2&#34;&gt;},&lt;/span&gt;
+  &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;PROD&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;{&lt;/span&gt;
+  &lt;span style=&#34;color: #f8f8f2&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color: #f8f8f2&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h4 id=&#34;step-2-2-lambdas:0fdc538f711f0b73c4e8cac8919e8b3b&#34;&gt;Step 2.2: Lambdas&lt;/h4&gt;
+
+&lt;p&gt;As mentioned earlier, we need to implement 9 lambdas for user, device, subscription, and notification management. you can add
+or update any of given function to support your requirements.
+&lt;a href=&#34;https://github.com/fartashh/userbase-sns-lambda&#34;&gt;you can download all lambdas from here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3 id=&#34;step-3-api-gateway:0fdc538f711f0b73c4e8cac8919e8b3b&#34;&gt;Step 3: API Gateway&lt;/h3&gt;
+
+&lt;p&gt;After deploying and testing all lambdas now it is time to add API gateway as a trigger.
+After creating the API in &lt;a href=&#34;https://aws.amazon.com/api-gateway/&#34;&gt;API Gateway&lt;/a&gt; console, we need to add four resources and for
+each resource we need to add corespondent method;&lt;/p&gt;
+
+&lt;p&gt;
+&lt;figure class=&#34;align-center&#34;&gt;
+    
+        &lt;img src=&#34;http://fartashh.github.io/images/post/lambda_sns/api_gateway.png&#34;  /&gt;
+    
+    
+&lt;/figure&gt;
+&lt;/p&gt;
+
+&lt;h3 id=&#34;step-4-send-scheduled-notification:0fdc538f711f0b73c4e8cac8919e8b3b&#34;&gt;Step 4: Send Scheduled notification&lt;/h3&gt;
+
+&lt;p&gt;You may figure it out by now that there is one lambda &lt;code&gt;handel_notification_cron&lt;/code&gt; which is not connected to any end point.
+For this lambda we need to add &lt;code&gt;CloudWatch Events - Schedule&lt;/code&gt; trigger. This trigger enable us to have a cron job and call lambdas every few
+minutes to send scheduled notifications.&lt;/p&gt;
+
+&lt;h3 id=&#34;step-5-security:0fdc538f711f0b73c4e8cac8919e8b3b&#34;&gt;Step 5: Security&lt;/h3&gt;
+
+&lt;p&gt;There are three techniques to secure your APIs. The simplest way is using &lt;em&gt;api-key&lt;/em&gt; you can simply add new api-key in API Gateway
+console and enforce APIs to use it. The second method is adding &lt;em&gt;Authorizers&lt;/em&gt;, it allows developers to authorize their APIs
+using bearer token authorization strategies, such as OAuth using an AWS Lambda function. And third method is using AWS_IAM role
+which is explained in detail on &lt;a href=&#34;https://auth0.com/docs/integrations/aws-api-gateway&#34;&gt;this tutorial&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;conclusion:0fdc538f711f0b73c4e8cac8919e8b3b&#34;&gt;conclusion&lt;/h2&gt;
+
+&lt;p&gt;AWS Lambdas makes you able to build and run applications on the AWS cloud quickly and easily. On the other hand, existence of
+many great services in different domains help developers to solve complex problems in short amount of time.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Serverless Approach to Transcode Media</title>

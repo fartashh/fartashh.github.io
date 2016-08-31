@@ -3,8 +3,13 @@
   
   <url>
     <loc>http://fartashh.github.io/</loc>
-    <lastmod>2016-05-24T16:21:57+08:00</lastmod>
+    <lastmod>2016-08-31T10:11:33+08:00</lastmod>
     <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://fartashh.github.io/post/architecting-serverless-push-notification/</loc>
+    <lastmod>2016-08-31T10:11:33+08:00</lastmod>
   </url>
   
   <url>

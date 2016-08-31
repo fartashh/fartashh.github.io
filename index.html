@@ -10,7 +10,6 @@
 		<meta property="og:url"  content="http://fartashh.github.io/" />
     	<meta name="description" content="">
     	<meta name="og:description" content="">
-    	<meta name="og:description" content="">
 		<meta property="og:image" content="" />
     	<meta http-equiv="content-language" content="en-us" />
     	<meta name="generator" content="Hugo 0.15" />
@@ -56,26 +55,36 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             
             <article class="post">
 <header>
-<h2><a href="http://fartashh.github.io/post/serverless-approach-to-transcode-media/">Serverless Approach to Transcode Media </a> </h2>
-<div class="post-meta">Tue, May 24, 2016 - Read in 4 Min </div>
+<h2><a href="http://fartashh.github.io/post/architecting-serverless-push-notification/">Architecting Serverless Push Notification System in AWS </a> </h2>
+<div class="post-meta">Wed, Aug 31, 2016 - Read in 3 Min </div>
 </header>
 <div class="summary">
     <p>
 <figure class="align-center">
     
-        <img src="/images/post/lambda-transcoder/s3-lambda-transcoder.png"  />
+        <img src="/images/post/lambda_sns/aws_sns_lambda.png"  />
     
     
 </figure>
 
-Handling and managing media content is quite challenging. You need to decode the media to different formats and qualities,
-to serve users with different devices and bandwidth.
-And I am pretty sure you don&rsquo;t want to handle this complexity in your app :).
-In this post I am going to explain how to setup the fully automated serverless approach by using AWS S3, Lambda, and Elastic Transcoder.</p>
+One of the best approaches to increase and keep customer engagement with your app is push notification and as you may know
+there are many services such SNS, Firebase, Pushwoosh, Urban Airship, carnival and etc., to address this need.</p>
+
+<p>Recently at Mindvalley we have decided to use one of the available solutions to send push notifications to our web and mobile users.
+The new service should support following requirements;</p>
+
+<ul>
+<li>Integrable with our user management system</li>
+<li>Authentication and Authorization with Auth0</li>
+<li>Send notification to <strong>user</strong> (multiple devices, multiple platform) not only single device</li>
+<li>Schedule notification</li>
+<li>Flexible user segmentation</li>
+<li>Comprehensive API to manage notification system</li>
+</ul>
 
 </div>
 <footer>
-<a href='http://fartashh.github.io/post/serverless-approach-to-transcode-media/'><nobr>Read more →</nobr></a>
+<a href='http://fartashh.github.io/post/architecting-serverless-push-notification/'><nobr>Read more →</nobr></a>
 </footer>
 </article>
 
@@ -98,6 +107,33 @@ In this post I am going to explain how to setup the fully automated serverless a
     <h2>Recent Posts</h2>
 
     <div class="row">
+        
+        <article class="6u 12u$(xsmall) work-item">
+            <h3><a href="/post/serverless-approach-to-transcode-media/">Serverless Approach to Transcode Media </a> <span class="post-date">Tue, May 24, 2016</span>
+            </h3>
+
+            <p><p>
+<figure class="align-center">
+    
+        <img src="/images/post/lambda-transcoder/s3-lambda-transcoder.png"  />
+    
+    
+</figure>
+
+Handling and managing media content is quite challenging. You need to decode the media to different formats and qualities,
+to serve users with different devices and bandwidth.
+And I am pretty sure you don&rsquo;t want to handle this complexity in your app :).
+In this post I am going to explain how to setup the fully automated serverless approach by using AWS S3, Lambda, and Elastic Transcoder.</p>
+</p>
+            <ul id="tags">
+                
+                <li class="tag"><a href="tags/aws">AWS</a></li>
+                
+                <li class="tag"><a href="tags/lambda">Lambda</a></li>
+                
+            </ul>
+
+        </article>
         
         <article class="6u 12u$(xsmall) work-item">
             <h3><a href="/post/how-calculate-mrr/">How to Calculate Monthly Recurring Revenue (MRR) </a> <span class="post-date">Sat, Apr 30, 2016</span>

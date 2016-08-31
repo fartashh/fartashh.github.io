@@ -1,0 +1,289 @@
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<title>Architecting Serverless Push Notification System in AWS &middot; Fartash</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta property="author" name="author" content="Fartash Haghani">
+		<meta property="og:type"  content="article" />
+		<meta property="og:url"  content="http://fartashh.github.io/post/architecting-serverless-push-notification/" />
+    	<meta name="description" content=" ">
+    	<meta name="og:description" content=" ">
+		<meta property="og:image" content="http://fartashh.github.io/images/post/lambda-sns/aws_sns_lambda.png" />
+    	<meta http-equiv="content-language" content="en-us" />
+    	<meta name="generator" content="Hugo 0.15" />
+		
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" type="text/css">
+		<link rel="stylesheet" href="http://fartashh.github.io/css/main.css" />
+		
+	</head>
+
+	<body id="top">
+        
+<noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-PQKJZV"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-PQKJZV');</script>
+
+        
+<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-54ec37c8275f096f"></script>
+
+		<!-- Header -->
+<header id="header">
+	<div class='my-image'>
+   <a href="#" class="image avatar"><img src="http://fartashh.github.io/images/avatar.jpg" alt="" /></a>
+  </div>
+  <div class='my-name'>Fartash Haghani</div>
+  <div class='my-position'>Software Engineer | Data Scientist</div>
+    <p class='bio'>I &lt;3 data and Ghorme Sabzi :)</p>
+	<p class='bio'>I am a software engineer with huge interest in data science and machine learning. I&rsquo;m working as Data Scientist and Developer at Mindvalley, where I get the chance to build scalable app with python and node.js to convert data into products. Beside that, I mentor students in programming and data science.</p>
+</header>
+
+
+		<!-- Main -->
+		<div id="main">
+            <h3><a href="/post/architecting-serverless-push-notification/">Architecting Serverless Push Notification System in AWS </a> <span class="post-date">Wed, Aug 31, 2016</span>
+            </h3>
+
+            <p> 
+
+<p>
+<figure class="align-center">
+    
+        <img src="/images/post/lambda_sns/aws_sns_lambda.png"  />
+    
+    
+</figure>
+
+One of the best approaches to increase and keep customer engagement with your app is push notification and as you may know
+there are many services such SNS, Firebase, Pushwoosh, Urban Airship, carnival and etc., to address this need.</p>
+
+<p>Recently at Mindvalley we have decided to use one of the available solutions to send push notifications to our web and mobile users.
+The new service should support following requirements;</p>
+
+<ul>
+<li>Integrable with our user management system</li>
+<li>Authentication and Authorization with Auth0</li>
+<li>Send notification to <strong>user</strong> (multiple devices, multiple platform) not only single device</li>
+<li>Schedule notification</li>
+<li>Flexible user segmentation</li>
+<li>Comprehensive API to manage notification system</li>
+</ul>
+
+<h2 id="proposed-solution:0fdc538f711f0b73c4e8cac8919e8b3b">Proposed Solution</h2>
+
+<p>After doing some research and comparing aforementioned solutions I came up with the idea of using server less approach.
+The proposed system used AWS SNS, RDS, Lambda, and API Gateway to fulfill all requirements.</p>
+
+
+<figure class="align-center">
+    
+        <img src="/images/post/lambda_sns/sns_architecture.png"  />
+    
+    
+</figure>
+
+
+<p>you can find all lambdas of the system <a href="https://github.com/fartashh/userbase-sns-lambda">here</a>
+lets look at each step of implementing the solution;</p>
+
+<h3 id="step-1-design-database:0fdc538f711f0b73c4e8cac8919e8b3b">Step 1: Design Database</h3>
+
+<p>I have decided to use RDS (postgresql) to store the system data. System&rsquo;s DB contains 4 tables;</p>
+
+<ul>
+<li><p><strong>users_endpoints</strong></p>
+
+<p><em>internal_user_id</em> : connects the system with user management system.</p>
+
+<p><em>arn</em> : Amazon Resource Name you get this value after registering the device in SNS.</p>
+
+<p><em>token</em> : user device token.</p>
+
+<p><em>app_name</em> : application name.</p>
+
+<p><em>user_data</em> : it is a dictionary, you can store any data for user and query them later based on given attributes.</p>
+
+<p><em>timezone</em> : to send notification in user timezone.</p></li>
+
+<li><p><strong>topics</strong></p>
+
+<p>stores topics which user may want to subscribe to them.</p></li>
+
+<li><p><strong>subscriptions</strong></p>
+
+<p>stores user&rsquo;s subscription information</p></li>
+
+<li><p><strong>notification</strong></p>
+
+<p>stores scheduled notifications</p></li>
+</ul>
+
+
+<figure class="align-center">
+    
+        <img src="/images/post/lambda_sns/aws_sns_lambda_erd.png"  />
+    
+    
+</figure>
+
+
+<h3 id="step-2-implement-lambdas:0fdc538f711f0b73c4e8cac8919e8b3b">Step 2: Implement Lambdas</h3>
+
+<p>Before you start uploading and deploying lambdas I suggest to
+read <a href="https://getpocket.com/a/read/1215426880"><em>Configure your Lambda functions like a champ and let your code sail smoothly to Production</em></a>
+post. It explains how setup your lambdas properly in <em>test</em>, <em>stg</em>, and <em>production</em> environments.</p>
+
+<h4 id="step-2-1-lambdas-configuration:0fdc538f711f0b73c4e8cac8919e8b3b">Step 2.1: Lambdas Configuration</h4>
+
+<p>We can store our configuration in AWS S3 ,dynamo db or in deployment package. configuration contains information
+about list of applications setup on SNS and RDS configuration for each environment.</p>
+
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">{</span>
+  <span style="color: #e6db74">&quot;$LATEST&quot;</span><span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #e6db74">&quot;APPLICATIONS&quot;</span><span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">{</span>
+      <span style="color: #e6db74">&quot;appname-ios-dev&quot;</span><span style="color: #f8f8f2">:</span> <span style="color: #e6db74">&quot;arn:aws:sns:us-east-1:xxxxxxxxxx:app/APNS_SANDBOX/ios-dev&quot;</span>
+    <span style="color: #f8f8f2">},</span>
+    <span style="color: #e6db74">&quot;DATABASE&quot;</span><span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">{</span>
+      <span style="color: #e6db74">&quot;host&quot;</span><span style="color: #f8f8f2">:</span> <span style="color: #e6db74">&quot;dev-sns-lambda.xxxxxxxxxx.us-east-1.rds.amazonaws.com&quot;</span><span style="color: #f8f8f2">,</span>
+      <span style="color: #e6db74">&quot;port&quot;</span><span style="color: #f8f8f2">:</span> <span style="color: #ae81ff">5432</span><span style="color: #f8f8f2">,</span>
+      <span style="color: #e6db74">&quot;db&quot;</span><span style="color: #f8f8f2">:</span> <span style="color: #e6db74">&quot;xxxxxxxxxx&quot;</span><span style="color: #f8f8f2">,</span>
+      <span style="color: #e6db74">&quot;tables&quot;</span><span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #e6db74">&quot;users_endpoints&quot;</span><span style="color: #f8f8f2">:</span> <span style="color: #e6db74">&quot;users_endpoints&quot;</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #e6db74">&quot;topics&quot;</span><span style="color: #f8f8f2">:</span> <span style="color: #e6db74">&quot;topics&quot;</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #e6db74">&quot;subscriptions&quot;</span><span style="color: #f8f8f2">:</span><span style="color: #e6db74">&quot;subscriptions&quot;</span><span style="color: #f8f8f2">,</span>
+        <span style="color: #e6db74">&quot;notifications&quot;</span><span style="color: #f8f8f2">:</span><span style="color: #e6db74">&quot;notifications&quot;</span>
+      <span style="color: #f8f8f2">},</span>
+      <span style="color: #e6db74">&quot;user&quot;</span><span style="color: #f8f8f2">:</span> <span style="color: #e6db74">&quot;xxxxxxxxxx&quot;</span><span style="color: #f8f8f2">,</span>
+      <span style="color: #e6db74">&quot;password&quot;</span><span style="color: #f8f8f2">:</span> <span style="color: #e6db74">&quot;xxxxxxxxxxxxxxxxxx&quot;</span>
+    <span style="color: #f8f8f2">}</span>
+  <span style="color: #f8f8f2">},</span>
+  <span style="color: #e6db74">&quot;DEV&quot;</span><span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">{</span>
+  <span style="color: #f8f8f2">},</span>
+  <span style="color: #e6db74">&quot;TEST&quot;</span><span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">{</span>
+  <span style="color: #f8f8f2">},</span>
+  <span style="color: #e6db74">&quot;PROD&quot;</span><span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">{</span>
+  <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+</pre></div>
+
+
+<h4 id="step-2-2-lambdas:0fdc538f711f0b73c4e8cac8919e8b3b">Step 2.2: Lambdas</h4>
+
+<p>As mentioned earlier, we need to implement 9 lambdas for user, device, subscription, and notification management. you can add
+or update any of given function to support your requirements.
+<a href="https://github.com/fartashh/userbase-sns-lambda">you can download all lambdas from here</a>.</p>
+
+<h3 id="step-3-api-gateway:0fdc538f711f0b73c4e8cac8919e8b3b">Step 3: API Gateway</h3>
+
+<p>After deploying and testing all lambdas now it is time to add API gateway as a trigger.
+After creating the API in <a href="https://aws.amazon.com/api-gateway/">API Gateway</a> console, we need to add four resources and for
+each resource we need to add corespondent method;</p>
+
+<p>
+<figure class="align-center">
+    
+        <img src="/images/post/lambda_sns/api_gateway.png"  />
+    
+    
+</figure>
+</p>
+
+<h3 id="step-4-send-scheduled-notification:0fdc538f711f0b73c4e8cac8919e8b3b">Step 4: Send Scheduled notification</h3>
+
+<p>You may figure it out by now that there is one lambda <code>handel_notification_cron</code> which is not connected to any end point.
+For this lambda we need to add <code>CloudWatch Events - Schedule</code> trigger. This trigger enable us to have a cron job and call lambdas every few
+minutes to send scheduled notifications.</p>
+
+<h3 id="step-5-security:0fdc538f711f0b73c4e8cac8919e8b3b">Step 5: Security</h3>
+
+<p>There are three techniques to secure your APIs. The simplest way is using <em>api-key</em> you can simply add new api-key in API Gateway
+console and enforce APIs to use it. The second method is adding <em>Authorizers</em>, it allows developers to authorize their APIs
+using bearer token authorization strategies, such as OAuth using an AWS Lambda function. And third method is using AWS_IAM role
+which is explained in detail on <a href="https://auth0.com/docs/integrations/aws-api-gateway">this tutorial</a>.</p>
+
+<h2 id="conclusion:0fdc538f711f0b73c4e8cac8919e8b3b">conclusion</h2>
+
+<p>AWS Lambdas makes you able to build and run applications on the AWS cloud quickly and easily. On the other hand, existence of
+many great services in different domains help developers to solve complex problems in short amount of time.</p>
+ </p>
+
+            <ul id="tags">
+                
+                <li class="tag"><a href="/tags/aws">AWS</a></li>
+                
+                <li class="tag"><a href="/tags/lambda">Lambda</a></li>
+                
+            </ul>
+
+            
+<div class="addthis_sharing_toolbox"></div>
+			<a href="/"> <i class="fa fa-home"></i> </a>
+
+            <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_config = function () {
+        this.page.url = 'http:\/\/fartashh.github.io\/post\/architecting-serverless-push-notification\/'; 
+        this.page.identifier = 'Architecting Serverless Push Notification System in AWS'; 
+    };
+    (function () {
+        
+        
+        if (window.location.hostname == "localhost")
+            return;
+
+        var dsq = document.createElement('script');
+        dsq.type = 'text/javascript';
+        dsq.async = true;
+        var disqus_shortname = 'fartashh';
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+</noscript>
+
+
+
+
+		</div>
+
+
+		<!-- Footer -->
+<footer id="footer">
+	<ul class="icons">
+		
+		
+		<li><a href="//twitter.com/fartashh" target="_blank" class="icon fa-twitter"><span class="label">Twitter</span></a></li>
+		
+		
+		<li><a href="//github.com/fartashh" target="_blank" class="icon fa-github"><span class="label">Github</span></a></li>
+		
+		
+		<li><a href="//my.linkedin.com/in/fartashh" target="_blank" class="icon fa-linkedin"><span class="label">Linkedin</span></a></li>
+		
+		
+		
+	</ul>
+
+	<ul class="copyright">
+		
+	</ul>
+</footer>
+
+<!-- Scripts -->
+<script src="http://fartashh.github.io/js/jquery.min.js"></script>
+<script src="http://fartashh.github.io/js/jquery.poptrox.min.js"></script>
+<script src="http://fartashh.github.io/js/skel.min.js"></script>
+<script src="http://fartashh.github.io/js/util.js"></script>
+
+<script src="http://fartashh.github.io/js/main.js"></script>
+
+
+
+	</body>
+</html>
