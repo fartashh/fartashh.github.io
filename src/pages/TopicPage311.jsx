@@ -8,10 +8,10 @@ const t311Modules = import.meta.glob('../knowledgebases/311/*.md', { as: 'raw', 
 
 export default function TopicPage311() {
   const { topicId } = useParams();
-  
+
   const t311Path = `../knowledgebases/311/${topicId}.md`;
   let content = 'Content not found.';
-  
+
   if (t311Modules[t311Path]) {
     content = t311Modules[t311Path];
   }
@@ -23,13 +23,13 @@ export default function TopicPage311() {
         <Link to="/" className="back-link">
           <ArrowLeft size={20} /> Back to Services
         </Link>
-        
+
         <div className="kb-panel panel-311 glass" style={{ maxWidth: '800px', margin: '0 auto' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
             <h2 className="panel-title" style={{ margin: 0 }}>
               <Phone size={24} /> 311 Services
             </h2>
-            <Link to={`/${topicId}`} className="back-link" style={{ margin: 0, color: 'var(--success-color)' }}>
+            <Link to={`/divisions/kb/${topicId}`} className="back-link" style={{ margin: 0, color: 'var(--success-color)' }}>
               <Building size={20} /> View Division Info
             </Link>
           </div>

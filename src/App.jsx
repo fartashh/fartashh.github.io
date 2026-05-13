@@ -15,6 +15,7 @@ function App() {
       <Route path="/divisions" element={<PageDivisionsList />} />
       <Route path="/contact" element={<PageContact />} />
       <Route path="/311/kb/:topicId" element={<TopicPage311 />} />
+      <Route path="/divisions/kb/:topicId" element={<TopicPageDivisional />} />
     </Routes>
   );
 }

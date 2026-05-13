@@ -34,7 +34,7 @@ export default function PageDivisionsList() {
             return (
               <Link
                 key={topic.id}
-                to={`/311/kb/${topic.id}`}
+                to={`/divisions/kb/${topic.id}`}
                 style={{ textDecoration: 'none', color: 'inherit' }}
               >
                 <div className="topic-card glass panel-divisions">
