@@ -14,7 +14,6 @@ function App() {
       <Route path="/311" element={<Page311List />} />
       <Route path="/divisions" element={<PageDivisionsList />} />
       <Route path="/contact" element={<PageContact />} />
-      <Route path="/:topicId" element={<TopicPageDivisional />} />
       <Route path="/311/kb/:topicId" element={<TopicPage311 />} />
     </Routes>
   );

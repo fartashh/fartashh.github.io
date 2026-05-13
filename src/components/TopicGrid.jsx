@@ -21,9 +21,9 @@ export default function TopicGrid() {
         {topics.map((topic) => {
           const IconComponent = topic.icon;
           return (
-            <Link 
-              key={topic.id} 
-              to={`/${topic.id}`}
+            <Link
+              key={topic.id}
+              to={`/311/kb/${topic.id}`}
               style={{ textDecoration: 'none', color: 'inherit' }}
             >
               <div className="topic-card glass">

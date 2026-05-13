@@ -15,13 +15,13 @@ const content = `<nav>
   <h1>How can we help you today?</h1>
   <p>Access municipal services and report issues in the City of Torvana.</p>
   <ul>
-    <li>Garbage &amp; Solid Waste Issues</li>
-    <li>Potholes &amp; Road Maintenance</li>
-    <li>Wildlife Requests</li>
-    <li>Property Standards &amp; Noise</li>
-    <li>Tree Maintenance</li>
-    <li>Water, Sewer &amp; Drainage</li>
-    <li>Snow &amp; Sidewalk Complaints</li>
+    <li><a href="/311/kb/garbage">Garbage &amp; Solid Waste</a></li>
+    <li><a href="/311/kb/potholes">Potholes &amp; Road Maintenance</a></li>
+    <li><a href="/311/kb/wildlife">Wildlife Requests</a></li>
+    <li><a href="/311/kb/property">Property Standards &amp; Noise</a></li>
+    <li><a href="/311/kb/tree">Tree Maintenance</a></li>
+    <li><a href="/311/kb/water">Water, Sewer &amp; Drainage</a></li>
+    <li><a href="/311/kb/snow">Snow &amp; Sidewalk Complaints</a></li>
   </ul>
 </main>`;
 

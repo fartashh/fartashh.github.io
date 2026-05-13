@@ -27,23 +27,23 @@ export default function PageDivisionsList() {
             Browse official policies, public service level agreements, and detailed responsibility matrices maintained by Torvana's municipal divisions.
           </p>
         </div>
-        
+
         <div className="grid">
           {topics.map((topic) => {
             const IconComponent = topic.icon;
             return (
-            <Link 
-              key={topic.id} 
-              to={`/${topic.id}`}
-              style={{ textDecoration: 'none', color: 'inherit' }}
-            >
-              <div className="topic-card glass panel-divisions">
-                <div className="icon-wrapper">
-                  <IconComponent size={32} />
+              <Link
+                key={topic.id}
+                to={`/311/kb/${topic.id}`}
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
+                <div className="topic-card glass panel-divisions">
+                  <div className="icon-wrapper">
+                    <IconComponent size={32} />
+                  </div>
+                  <h3>{topic.title}</h3>
                 </div>
-                <h3>{topic.title}</h3>
-              </div>
-            </Link>
+              </Link>
             );
           })}
         </div>
