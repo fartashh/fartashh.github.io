@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && cp -R static-pages/* dist/ && node inject-static.js && node generate-seo.js && cp -R dist/* .",
+    "build": "vite build && cp -R static-pages/* dist/ && node inject-static.js && node inject-divisions.js && node generate-seo.js && cp -R dist/* .",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },

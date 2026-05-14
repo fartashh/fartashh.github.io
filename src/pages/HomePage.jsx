@@ -10,7 +10,7 @@ export default function HomePage() {
       <TopicGrid />
       <footer className="footer">
         <div className="container">
-          <p>&copy; {new Date().getFullYear()} City of Torvana. All rights reserved.</p>
+          <p>&copy; 2026 City of Torvana. All rights reserved.</p>
           <p>
             <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a>
           </p>

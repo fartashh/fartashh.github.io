@@ -2,11 +2,15 @@ import { writeFileSync } from 'fs';
 
 const BASE_URL = process.env.SITE_URL || 'https://fartashh.github.io';
 
+const services = ['garbage', 'potholes', 'wildlife', 'property', 'tree', 'water', 'snow'];
+
 const pages = [
   { path: '/', priority: '1.0', changefreq: 'weekly' },
-  { path: '/311', priority: '0.9', changefreq: 'weekly' },
-  { path: '/divisions', priority: '0.9', changefreq: 'weekly' },
-  { path: '/contact', priority: '0.7', changefreq: 'monthly' },
+  { path: '/311/', priority: '0.9', changefreq: 'weekly' },
+  { path: '/divisions/', priority: '0.9', changefreq: 'weekly' },
+  { path: '/contact/', priority: '0.9', changefreq: 'monthly' },
+  ...services.map(s => ({ path: `/311/kb/${s}`, priority: '0.8', changefreq: 'weekly' })),
+  ...services.map(s => ({ path: `/divisions/kb/${s}`, priority: '0.8', changefreq: 'weekly' })),
 ];
 
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
@@ -18,5 +22,5 @@ ${pages.map(p => `  <url>
   </url>`).join('\n')}
 </urlset>`;
 
-writeFileSync('dist/sitemap.xml', sitemap);
+writeFileSync('sitemap.xml', sitemap);
 console.log('✅ sitemap.xml generated with', pages.length, 'URLs');
