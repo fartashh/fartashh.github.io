@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://fartashh.github.io/sitemap.xml
